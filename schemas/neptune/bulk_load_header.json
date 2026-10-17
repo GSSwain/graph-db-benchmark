@@ -1,0 +1,22 @@
+{
+  "neptune_csv_format": "AWS Neptune Bulk Loader CSV format",
+  "vertex_files": {
+    "Account": "~id,~label,createTime:Long,isBlocked:Bool,type:String,nickname:String,phonenum:String,freqLoginType:String,lastLoginTime:Long,accountLevel:String",
+    "Person": "~id,~label,name:String,isBlocked:Bool,createTime:Long,gender:String,birthday:Long,country:String,city:String",
+    "Company": "~id,~label,name:String,isBlocked:Bool,createTime:Long,country:String,city:String,business:String,description:String",
+    "Loan": "~id,~label,loanAmount:Long,balance:Long,createTime:Long,usage:String,interestRate:Double",
+    "Medium": "~id,~label,medType:String,isBlocked:Bool,createTime:Long,lastLogin:Long"
+  },
+  "edge_files": {
+    "transfer": "~id,~from,~to,~label,amount:Long,createTime:Long,order:Long",
+    "withdraw": "~id,~from,~to,~label,amount:Long,createTime:Long",
+    "repay": "~id,~from,~to,~label,amount:Long,createTime:Long",
+    "deposit": "~id,~from,~to,~label,amount:Long,createTime:Long",
+    "signIn": "~id,~from,~to,~label,createTime:Long",
+    "own": "~id,~from,~to,~label,createTime:Long",
+    "apply": "~id,~from,~to,~label,createTime:Long,organization:String",
+    "guarantee": "~id,~from,~to,~label,createTime:Long,relation:String",
+    "invest": "~id,~from,~to,~label,createTime:Long,ratio:Double",
+    "workIn": "~id,~from,~to,~label,comment:String"
+  }
+}

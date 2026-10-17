@@ -1,0 +1,3 @@
+// LDBC FinBench Specification - Azure Cosmos DB Gremlin Graph Schema
+// Partition Key: /pk
+// Indexing Policy: Consistent, All properties indexed

@@ -1,0 +1,121 @@
+{
+  "timestamp": "2026-10-17 10:13:27 UTC",
+  "scale_preset": "dev",
+  "target_qps": 250.0,
+  "pricing_scope": "Dedicated database infrastructure only (excluding client runners)",
+  "monthly_infrastructure_usd": {
+    "Neo4j": {
+      "monthly_cost_usd": 394.65,
+      "hourly_cost_usd": 0.5406,
+      "infrastructure_monthly_usd": 394.65,
+      "license_monthly_usd": 0.0,
+      "license_usd_per_core_month": 0.0,
+      "licensed_cores": 12,
+      "cluster_nodes": 3,
+      "spec": "3 nodes x 2.0 GB RAM, 1.0 GB NVMe each; 12 licensed cores",
+      "pricing_model": "Self-hosted Neo4j Enterprise 3-node HA; license rate is quote-based"
+    },
+    "Memcached": {
+      "monthly_cost_usd": 10.95,
+      "hourly_cost_usd": 0.015,
+      "spec": "1.0 GB RAM (ElastiCache cache.r6g)",
+      "pricing_model": "AWS ElastiCache for Memcached"
+    },
+    "Neptune": {
+      "monthly_cost_usd": 438.1,
+      "hourly_cost_usd": 0.6001,
+      "spec": "4.0 GB RAM, 1.0 GB Cluster Storage",
+      "pricing_model": "AWS Neptune Multi-AZ"
+    },
+    "Spanner": {
+      "monthly_cost_usd": 657.3,
+      "hourly_cost_usd": 0.9004,
+      "spec": "1 Spanner Node(s) (1,000 PUs), 1.0 GB SSD",
+      "pricing_model": "GCP Cloud Spanner"
+    },
+    "CosmosDB": {
+      "monthly_cost_usd": 219.25,
+      "hourly_cost_usd": 0.3003,
+      "spec": "3,750 Provisioned RU/s, 1.0 GB Storage",
+      "pricing_model": "Azure Cosmos DB Gremlin API"
+    }
+  },
+  "cost_per_million_queries_by_hop": {
+    "Neo4j-Cypher": {
+      "1": 0.529,
+      "2": 0.437,
+      "3": 0.223,
+      "4": 0.209,
+      "5": 0.214,
+      "6": 2.171,
+      "7": 0.978,
+      "8": 11.19,
+      "9": 3.56,
+      "10": 2.692,
+      "15": 2.579,
+      "20": 2.764,
+      "30": 2.751,
+      "40": 2.793,
+      "50": 2.598,
+      "75": 3.15,
+      "100": 2.57
+    },
+    "Neo4j-DirectedTrail": {
+      "1": 0.163,
+      "2": 0.14,
+      "3": 0.142,
+      "4": 0.15,
+      "5": 0.238,
+      "6": 0.481,
+      "7": 0.48,
+      "8": 0.45,
+      "9": 0.434,
+      "10": 0.173,
+      "15": 0.495,
+      "20": 0.204,
+      "30": 0.555,
+      "40": 0.544,
+      "50": 0.185,
+      "75": 0.464,
+      "100": 0.27
+    },
+    "Memcached-MultiGet": {
+      "1": 0.002,
+      "2": 0.003,
+      "3": 0.002,
+      "4": 0.003,
+      "5": 0.004,
+      "6": 0.005,
+      "7": 0.006,
+      "8": 0.007,
+      "9": 0.009,
+      "10": 0.011,
+      "15": 0.046,
+      "20": 0.105,
+      "30": 0.136,
+      "40": 0.139,
+      "50": 0.139,
+      "75": 0.133,
+      "100": 0.131
+    },
+    "Memcached-DFS": {
+      "1": 0.001,
+      "2": 0.001,
+      "3": 0.002,
+      "4": 0.003,
+      "5": 0.004,
+      "6": 0.004,
+      "7": 0.004,
+      "8": 0.005,
+      "9": 0.006,
+      "10": 0.006,
+      "15": 0.009,
+      "20": 0.013,
+      "30": 0.019,
+      "40": 0.025,
+      "50": 0.032,
+      "75": 0.046,
+      "100": 0.061
+    }
+  }
+}

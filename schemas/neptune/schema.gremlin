@@ -1,0 +1,5 @@
+// LDBC FinBench Specification - AWS Neptune Gremlin Schema & Scripts
+// Vertex Labels: Person, Company, Account, Loan, Medium
+// Edge Labels: transfer, withdraw, repay, deposit, signIn, own, apply, guarantee, invest, workIn
+// Sample Gremlin k-hop transfer path:
+// g.V().has("Account", "id", startId).repeat(out("transfer").simplePath()).times(k).path().limit(10)

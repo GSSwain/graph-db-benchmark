@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: finbench-test-runner
+  namespace: benchmark
+spec:
+  template:
+    metadata:
+      labels:
+        app: finbench-test-runner
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: runner
+          image: finbench-test-runner:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NEO4J_URI
+              value: "bolt://neo4j-cluster:7687"
+            - name: NEPTUNE_ENDPOINT
+              value: "wss://finbench-neptune.cluster-xxxx.us-east-1.neptune.amazonaws.com:8182/gremlin"
+            - name: SPANNER_INSTANCE
+              value: "finbench-prod"
+            - name: SPANNER_DATABASE
+              value: "finbench-db"
+            - name: MEMCACHED_HOST
+              value: "memcached-cluster"
+          command: ["python", "runner.py"]
+          args:
+            - "--engines"
+            - "neptune,spanner,cosmos,neo4j,memcached"
+            - "--hops"
+            - "1,2,3,4,5,6,7,8,9,10,15,20,30,40,50,75,100"
+            - "--iterations"
+            - "50"
+            - "--concurrency"
+            - "16"
+            - "--output-dir"
+            - "/mnt/reports"
+          volumeMounts:
+            - name: reports-storage
+              mountPath: /mnt/reports
+            - name: shared-storage
+              mountPath: /app/data
+      volumes:
+        - name: reports-storage
+          persistentVolumeClaim:
+            claimName: finbench-reports-pvc
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: finbench-pv-claim
