@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LDBC FinBench Reports</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f19;
+      --surface: #151e32;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 3rem 1.25rem;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    main { width: min(920px, 100%); margin: 0 auto; }
+    header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p { color: var(--muted); margin: 0; }
+    nav { display: grid; gap: 0.75rem; }
+    a {
+      display: block;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+    }
+    a:hover, a:focus-visible { border-color: var(--accent); outline: none; }
+    a strong { display: block; margin-bottom: 0.25rem; color: var(--accent); font-size: 1rem; }
+    a span { color: var(--muted); font-size: 0.9rem; }
+    footer { margin-top: 2rem; color: var(--muted); font-size: 0.82rem; }
+    @media (max-width: 600px) { body { padding: 1.5rem 0.9rem; } h1 { font-size: 1.55rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>LDBC FinBench Benchmark Reports</h1>
+      <p>Production-oriented multi-hop graph traversal performance, operating cost, and data-model comparison.</p>
+    </header>
+    <nav aria-label="Benchmark reports">
+      <a href="benchmark_report.html"><strong>Performance</strong><span>Latency, throughput, and query results by hop depth.</span></a>
+      <a href="cost_report.html"><strong>Infrastructure costs</strong><span>Monthly infrastructure estimates and quote-based Neo4j license costs.</span></a>
+      <a href="modeling_report.html"><strong>Modeling and data storage</strong><span>FinBench logical model, physical representations, production capacity, and technology tradeoffs.</span></a>
+    </nav>
+    <footer>Model and workload reference: LDBC FinBench. Cost and capacity estimates are assumptions; validate them against the deployed product, topology, and current vendor pricing.</footer>
+  </main>
+</body>
+</html>

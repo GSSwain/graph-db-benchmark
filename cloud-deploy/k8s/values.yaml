@@ -1,0 +1,23 @@
+# Helm Values for FinBench Distributed Cloud Benchmark
+replicaCount: 1
+
+image:
+  generator: finbench-data-generator:latest
+  runner: finbench-test-runner:latest
+  pullPolicy: IfNotPresent
+
+storage:
+  className: gp3
+  size: 500Gi
+
+scale:
+  preset: cloud # dev, local, medium, cloud, full (10T)
+  scaleFactor: 1.0
+  partitions: 100
+  parallelism: 20
+
+benchmark:
+  engines: "neo4j,memcached,neptune,spanner,cosmos"
+  hops: "1,2,3,4,5,6,7,8,9,10,15,20,30,40,50,75,100"
+  iterations: 50
+  concurrency: 16

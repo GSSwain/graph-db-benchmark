@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LDBC FinBench - Database Cost Report</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #151e32;
+      --surface-raised: #1b263b;
+      --card-border: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    main { max-width: 1440px; margin: 0 auto; }
+    header {
+      align-items: center;
+      padding-bottom: 1.75rem;
+      margin-bottom: 2.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+    h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h2 { margin: 0 0 1rem; font-size: 1.1rem; }
+    p { color: var(--muted); margin: 0.4rem 0; }
+    a { color: var(--accent); }
+    .meta { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 0.85rem; }
+    .meta span, .nav-link {
+      padding: 0.35rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .cost-stat-card, .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+    }
+    .cost-stat-card { border-top: 3px solid var(--card-accent, var(--accent)); }
+    .cost-stat-title { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
+    .cost-stat-value { font-size: 1.6rem; font-weight: 750; margin: 0.25rem 0; }
+    .cost-stat-sub { color: var(--muted); font-size: 0.82rem; overflow-wrap: anywhere; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { padding: 0.7rem; border-bottom: 1px solid var(--border); text-align: left; }
+    th { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; }
+    .metric-value { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (max-width: 640px) {
+      body { padding: 1.25rem 0.8rem; }
+      h1 { font-size: 1.45rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Database Cost Estimates</h1>
+        <p>Dedicated database infrastructure and software license pricing</p>
+        <div class="meta">
+          <span>Generated: 2026-10-17 10:13:27 UTC</span>
+          <span>Scale: dev</span>
+          <span>Target throughput: 250 QPS</span>
+        </div>
+      </div>
+      <nav aria-label="Related reports">
+        <a class="nav-link" href="benchmark_report.html">Performance</a>
+        <a class="nav-link" href="modeling_report.html">Models & storage</a>
+      </nav>
+    </header>
+    <section class="grid" aria-label="Monthly cost estimates">
+      <div class="cost-stat-card" style="--card-accent: #008cc1;">  <div class="cost-stat-title">Neo4j Infrastructure</div>  <div class="cost-stat-value">$394.65<span style="font-size: 0.9rem; font-weight: normal; color: #94a3b8;">/mo</span></div>  <div class="cost-stat-sub">$0.5406/hr &bull; 3 nodes x 2.0 GB RAM, 1.0 GB NVMe each; 12 licensed cores</div><div class="cost-stat-sub">Infrastructure: $394.65/mo; license not priced (quote required)</div></div>
+<div class="cost-stat-card" style="--card-accent: #10b981;">  <div class="cost-stat-title">Memcached Infrastructure</div>  <div class="cost-stat-value">$10.95<span style="font-size: 0.9rem; font-weight: normal; color: #94a3b8;">/mo</span></div>  <div class="cost-stat-sub">$0.0150/hr &bull; 1.0 GB RAM (ElastiCache cache.r6g)</div></div>
+<div class="cost-stat-card" style="--card-accent: #f59e0b;">  <div class="cost-stat-title">Neptune Infrastructure</div>  <div class="cost-stat-value">$438.10<span style="font-size: 0.9rem; font-weight: normal; color: #94a3b8;">/mo</span></div>  <div class="cost-stat-sub">$0.6001/hr &bull; 4.0 GB RAM, 1.0 GB Cluster Storage</div></div>
+<div class="cost-stat-card" style="--card-accent: #4285f4;">  <div class="cost-stat-title">Spanner Infrastructure</div>  <div class="cost-stat-value">$657.30<span style="font-size: 0.9rem; font-weight: normal; color: #94a3b8;">/mo</span></div>  <div class="cost-stat-sub">$0.9004/hr &bull; 1 Spanner Node(s) (1,000 PUs), 1.0 GB SSD</div></div>
+<div class="cost-stat-card" style="--card-accent: #a855f7;">  <div class="cost-stat-title">CosmosDB Infrastructure</div>  <div class="cost-stat-value">$219.25<span style="font-size: 0.9rem; font-weight: normal; color: #94a3b8;">/mo</span></div>  <div class="cost-stat-sub">$0.3003/hr &bull; 3,750 Provisioned RU/s, 1.0 GB Storage</div></div>
+    </section>
+    <section class="panel">
+      <h2>Monthly sizing and cost breakdown</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Database</th>
+              <th>Estimated Monthly Cost</th>
+              <th>Hourly Rate</th>
+              <th>Cost / 1M Reads</th>
+              <th>Pricing Unit</th>
+              <th>Provisioned Sizing</th>
+              <th>License Cost</th>
+            </tr>
+          </thead>
+          <tbody><tr>  <td><strong>Neo4j</strong></td>  <td class="metric-value" style="color: var(--accent);">$394.65 / month</td>  <td class="metric-value">$0.5406 / hour</td>  <td class="metric-value" style="color: var(--success);">$0.6007</td>  <td>3-node RAM + NVMe SSD + Enterprise license</td>  <td style="color: var(--text-muted);">3 nodes x 2.0 GB RAM, 1.0 GB NVMe each; 12 licensed cores</td>  <td class="metric-value">Quote required</td></tr>
+<tr>  <td><strong>Memcached</strong></td>  <td class="metric-value" style="color: var(--accent);">$10.95 / month</td>  <td class="metric-value">$0.0150 / hour</td>  <td class="metric-value" style="color: var(--success);">$0.0167</td>  <td>In-Memory Instance (cache.r6g)</td>  <td style="color: var(--text-muted);">1.0 GB RAM (ElastiCache cache.r6g)</td>  <td class="metric-value">N/A</td></tr>
+<tr>  <td><strong>Neptune</strong></td>  <td class="metric-value" style="color: var(--accent);">$438.10 / month</td>  <td class="metric-value">$0.6001 / hour</td>  <td class="metric-value" style="color: var(--success);">$0.6668</td>  <td>Instance-hr + Cluster Storage + I/O</td>  <td style="color: var(--text-muted);">4.0 GB RAM, 1.0 GB Cluster Storage</td>  <td class="metric-value">N/A</td></tr>
+<tr>  <td><strong>Spanner</strong></td>  <td class="metric-value" style="color: var(--accent);">$657.30 / month</td>  <td class="metric-value">$0.9004 / hour</td>  <td class="metric-value" style="color: var(--success);">$1.0004</td>  <td>Spanner Nodes (PUs) + SSD Storage</td>  <td style="color: var(--text-muted);">1 Spanner Node(s) (1,000 PUs), 1.0 GB SSD</td>  <td class="metric-value">N/A</td></tr>
+<tr>  <td><strong>CosmosDB</strong></td>  <td class="metric-value" style="color: var(--accent);">$219.25 / month</td>  <td class="metric-value">$0.3003 / hour</td>  <td class="metric-value" style="color: var(--success);">$0.3337</td>  <td>Compute + Storage</td>  <td style="color: var(--text-muted);">3,750 Provisioned RU/s, 1.0 GB Storage</td>  <td class="metric-value">N/A</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+    <p style="margin-top: 1rem;">Neo4j Enterprise licensing is quote-based. When no rate is configured, its estimate includes infrastructure only and the license is marked quote required.</p>
+  </main>
+</body>
+</html>

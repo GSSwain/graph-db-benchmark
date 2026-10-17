@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LDBC FinBench - Modeling & Data Storage</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #151e32;
+      --surface-raised: #1b263b;
+      --line: #334155;
+      --card-border: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --blue: #38bdf8;
+      --gold: #f59e0b;
+      --pink: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    main { max-width: 1440px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 1.75rem;
+      margin-bottom: 2.25rem;
+    }
+    .eyebrow { margin: 0 0 0.35rem; color: var(--accent); font-size: 0.76rem; text-transform: uppercase; }
+    h1 {
+      margin: 0 0 0.5rem;
+      max-width: 780px;
+      font-size: 2rem;
+      line-height: 1.2;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h2 { margin: 0 0 0.75rem; font-size: 1.3rem; }
+    h3 { margin: 0 0 0.55rem; font-size: 1.05rem; color: var(--accent); }
+    p { margin: 0.45rem 0; color: var(--muted); }
+    a { color: var(--accent); }
+    nav { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    nav a, .jump-links a {
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.42rem 0.65rem;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    nav a:hover, .jump-links a:hover { border-color: var(--accent); color: var(--text); }
+    .intro { max-width: 1000px; font-size: 1.03rem; margin-bottom: 1.25rem; }
+    .jump-links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0 2rem; }
+    .section { padding: 1.5rem 0; border-top: 1px solid var(--line); }
+    .section-lead { max-width: 1050px; margin: 0 0 1rem; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: 6px; background: var(--surface); }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { padding: 0.78rem 0.85rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); background: var(--surface-raised); font-size: 0.73rem; text-transform: uppercase; }
+    .comparison-table th:first-child, .comparison-table td:first-child { width: 16%; }
+    .comparison-table th:nth-child(2), .comparison-table td:nth-child(2) { width: 42%; }
+    .comparison-table th:nth-child(3), .comparison-table td:nth-child(3) { width: 42%; }
+    td:first-child { color: var(--text); font-weight: 650; white-space: nowrap; }
+    td { color: var(--muted); }
+    code {
+      color: #d8f0ea;
+      background: #202e35;
+      border-radius: 3px;
+      padding: 0.08rem 0.24rem;
+      font: 0.88em ui-monospace, SFMono-Regular, Menlo, monospace;
+      overflow-wrap: anywhere;
+    }
+    .engine { scroll-margin-top: 1rem; padding: 1.4rem 0; border-top: 1px solid var(--line); }
+    .engine-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.85rem; }
+    .engine-heading h2 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+    .tag { color: var(--gold); font-size: 0.8rem; }
+    .engine-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--card-border); border: 1px solid var(--card-border); border-radius: 6px; overflow: hidden; }
+    .engine-grid section { padding: 1rem; background: var(--surface); min-width: 0; }
+    .engine-grid section:last-child { grid-column: 1 / -1; }
+        .model-diagrams {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.75rem;
+          margin: 0.9rem 0 1rem;
+        }
+        .diagram-panel {
+          min-width: 0;
+          padding: 0.85rem;
+          border: 1px solid var(--line);
+          border-radius: 5px;
+          background: var(--surface);
+        }
+        .diagram-panel h3 { margin: 0 0 0.65rem; font-size: 0.85rem; text-transform: uppercase; }
+        .diagram-flow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.45rem;
+          min-height: 95px;
+          flex-wrap: wrap;
+        }
+        .diagram-node, .diagram-record {
+          display: grid;
+          gap: 0.12rem;
+          padding: 0.55rem 0.65rem;
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          background: var(--surface-raised);
+          color: var(--text);
+          font: 0.76rem/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+          overflow-wrap: anywhere;
+          text-align: center;
+        }
+        .diagram-record { border-color: #55627a; background: #202b40; }
+        .diagram-node small, .diagram-record small { color: var(--muted); font: inherit; }
+        .diagram-edge { color: var(--accent); text-align: center; font-size: 0.75rem; }
+        .diagram-edge b { display: block; font-size: 1rem; font-weight: 500; }
+        .diagram-caption { margin-top: 0.55rem; font-size: 0.8rem; }
+      .full-model-figure, .physical-model-figure { display: block; margin: 1rem 0 1.25rem; }
+      .entity-types { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 0.85rem; }
+      .entity-type { min-width: 0; padding: 0.7rem; border: 1px solid var(--card-border); border-top: 3px solid var(--accent); border-radius: 5px; background: var(--surface); }
+      .entity-type strong { display: block; color: var(--text); font-size: 0.88rem; }
+      .entity-type small { display: block; margin-top: 0.25rem; color: var(--muted); font: 0.72rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+      .relation-map { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
+      .relation-row { display: grid; grid-template-columns: minmax(5rem, 1fr) auto minmax(5rem, 1fr) auto minmax(5rem, 1fr); align-items: center; gap: 0.35rem; min-width: 0; padding: 0.55rem; border: 1px solid var(--card-border); border-radius: 4px; background: var(--surface); }
+      .relation-end, .relation-type { min-width: 0; padding: 0.3rem; border-radius: 3px; font: 0.73rem/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center; overflow-wrap: anywhere; }
+      .relation-end { color: var(--text); background: var(--surface-raised); }
+      .relation-type { color: var(--accent); background: rgba(56, 189, 248, 0.1); }
+      .relation-arrow { color: var(--muted); text-align: center; }
+      .physical-mapping { margin-top: 0.75rem; padding: 0.85rem; border: 1px solid var(--card-border); border-radius: 5px; background: var(--surface); }
+      .physical-mapping h3 { margin: 0 0 0.6rem; font-size: 0.82rem; text-transform: uppercase; }
+      .physical-row { display: grid; grid-template-columns: minmax(9rem, 0.7fr) minmax(0, 1.3fr); gap: 0.7rem; padding: 0.48rem 0; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.8rem; }
+      .physical-row strong { color: var(--text); }
+      .physical-note { margin-top: 0.65rem; color: var(--warning); font-size: 0.8rem; }
+      .storage-examples {
+        margin: 0 0 1rem;
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--card-border);
+        border-radius: 6px;
+        background: var(--surface);
+      }
+      .storage-examples h3 { margin-bottom: 0.25rem; }
+      .storage-examples p { margin: 0.35rem 0 0.65rem; font-size: 0.82rem; }
+      .storage-examples pre {
+        margin: 0;
+        padding: 0.8rem;
+        overflow-x: auto;
+        border-radius: 4px;
+        background: #0b0f19;
+        color: #dbeafe;
+        font: 0.78rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: pre;
+      }
+      .storage-examples pre code { padding: 0; background: transparent; color: inherit; font: inherit; }
+      .tradeoff-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+      .tradeoff-card { min-width: 0; padding: 1rem; border: 1px solid var(--card-border); border-radius: 6px; background: var(--surface); }
+      .tradeoff-card h3 { margin-bottom: 0.35rem; }
+      .tradeoff-type { color: var(--gold); font-size: 0.82rem; }
+      .tradeoff-points { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; margin-top: 0.75rem; }
+      .tradeoff-points h4 { margin: 0 0 0.25rem; color: var(--accent); font-size: 0.78rem; text-transform: uppercase; }
+      .tradeoff-points p { margin: 0; font-size: 0.84rem; }
+      .capacity-watch { grid-column: 1 / -1; padding-top: 0.65rem; border-top: 1px solid var(--card-border); }
+      .capacity-watch h4 { margin: 0 0 0.25rem; color: var(--gold); font-size: 0.78rem; text-transform: uppercase; }
+      .capacity-watch p { margin: 0; font-size: 0.84rem; }
+      .tradeoff-card:last-child { grid-column: 1 / -1; }
+    ul { padding-left: 1.2rem; margin: 0.4rem 0 0; color: var(--muted); }
+    li { margin: 0.35rem 0; }
+    .note { border-left: 3px solid var(--gold); padding: 0.75rem 0.9rem; background: rgba(237, 189, 104, 0.08); margin: 1rem 0; color: var(--muted); }
+    .note strong { color: var(--gold); }
+    .logical { color: var(--blue); }
+    footer { margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: 1rem; color: var(--muted); font-size: 0.83rem; }
+    @media (max-width: 760px) {
+      main { padding: 1.25rem 0.8rem 3rem; }
+      h1 { font-size: 1.45rem; }
+      .engine-grid { grid-template-columns: 1fr; }
+      .engine-grid section:last-child { grid-column: auto; }
+      .model-diagrams { grid-template-columns: 1fr; }
+      .comparison-table thead { display: none; }
+      .comparison-table, .comparison-table tbody, .comparison-table tr { display: block; width: 100%; }
+      .comparison-table tr { border-bottom: 1px solid var(--line); padding: 0.45rem 0; }
+      .comparison-table td { display: grid; grid-template-columns: minmax(7.5rem, 32%) minmax(0, 1fr); gap: 0.6rem; border-bottom: 0; padding: 0.45rem 0.65rem; }
+      .comparison-table td::before { content: attr(data-label); color: var(--accent); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+      .comparison-table td:first-child { white-space: normal; }
+      .entity-types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .relation-map { grid-template-columns: 1fr; }
+      .physical-row { grid-template-columns: 1fr; gap: 0.25rem; }
+      .tradeoff-grid, .tradeoff-points { grid-template-columns: 1fr; }
+      .tradeoff-card:last-child { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">LDBC FinBench · Data architecture</p>
+        <h1>One graph, five physical designs</h1>
+        <p>Logical relationships, physical storage, traversal execution, and schema decisions</p>
+      </div>
+      <nav aria-label="Related reports">
+        <a href="benchmark_report.html">Performance</a>
+        <a href="cost_report.html">Cost estimates</a>
+      </nav>
+    </header>
+
+    <p class="intro">The benchmark's logical graph is constant: typed financial entities connected by directed, typed, property-bearing relationships. What changes by engine is whether a relationship is a native graph edge, a row in an edge table, or an adjacency record addressed by a key. That physical choice determines which identifiers, indexes, partition keys, and denormalized copies the schema must provide.</p>
+      <p class="intro">Reference model: the entity types, properties, and relationship endpoint variants follow the <a href="https://ldbcouncil.org/ldbc_finbench_docs/ldbc-finbench-specification.pdf" target="_blank" rel="noreferrer">LDBC FinBench specification</a>. Each physical diagram maps the complete logical inventory into that technology's storage model.</p>
+    <p>Page generated: 2026-10-17 10:13:27 UTC · Current-state notes below describe this repository's schemas and adapters; recommendations are modeling considerations, not claims that the benchmark has already implemented them.</p>
+    <div class="jump-links" aria-label="Jump to database">
+      <a href="#neo4j">Neo4j</a>
+      <a href="#memcached">Memcached</a>
+      <a href="#neptune">Neptune</a>
+      <a href="#spanner">Spanner Graph</a>
+      <a href="#cosmos">Cosmos DB</a>
+      <a href="#modeling-tradeoffs">Model tradeoffs</a>
+    </div>
+
+    <section class="section" id="logical-model">
+      <h2>Shared logical model</h2>
+      <p class="section-lead">The FinBench logical graph has five entity types and ten relationship labels, with fourteen directed endpoint variants. This is the reference model for all physical diagrams below. Each entity lists its logical properties, and each edge label is shown with its source and destination type.</p>
+      <figure class="full-model-figure" aria-label="Complete LDBC FinBench logical data model">
+        <div class="diagram-panel">
+          <h3>Entity types and properties</h3>
+          <div class="entity-types">
+            <div class="entity-type"><strong>Person</strong><small>id, name, isBlocked, createTime, gender, birthday, country, city</small></div>
+            <div class="entity-type"><strong>Company</strong><small>id, name, isBlocked, createTime, country, city, business, description</small></div>
+            <div class="entity-type"><strong>Account</strong><small>id, createTime, isBlocked, type, nickname, phonenum, freqLoginType, lastLoginTime, accountLevel</small></div>
+            <div class="entity-type"><strong>Loan</strong><small>id, loanAmount, balance, createTime, usage, interestRate</small></div>
+            <div class="entity-type"><strong>Medium</strong><small>id, medType, isBlocked, createTime, lastLogin</small></div>
+          </div>
+          <h3>Directed, property-bearing relationships</h3>
+          <div class="relation-map">
+            <div class="relation-row"><span class="relation-end">Account</span><span class="relation-arrow">&rarr;</span><span class="relation-type">transfer</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Account</span></div>
+            <div class="relation-row"><span class="relation-end">Account</span><span class="relation-arrow">&rarr;</span><span class="relation-type">withdraw</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Account</span></div>
+            <div class="relation-row"><span class="relation-end">Account</span><span class="relation-arrow">&rarr;</span><span class="relation-type">repay</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Loan</span></div>
+            <div class="relation-row"><span class="relation-end">Loan</span><span class="relation-arrow">&rarr;</span><span class="relation-type">deposit</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Account</span></div>
+            <div class="relation-row"><span class="relation-end">Medium</span><span class="relation-arrow">&rarr;</span><span class="relation-type">signIn</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Account</span></div>
+            <div class="relation-row"><span class="relation-end">Person</span><span class="relation-arrow">&rarr;</span><span class="relation-type">own</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Account</span></div>
+            <div class="relation-row"><span class="relation-end">Company</span><span class="relation-arrow">&rarr;</span><span class="relation-type">own</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Account</span></div>
+            <div class="relation-row"><span class="relation-end">Person</span><span class="relation-arrow">&rarr;</span><span class="relation-type">apply</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Loan</span></div>
+            <div class="relation-row"><span class="relation-end">Company</span><span class="relation-arrow">&rarr;</span><span class="relation-type">apply</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Loan</span></div>
+            <div class="relation-row"><span class="relation-end">Person</span><span class="relation-arrow">&rarr;</span><span class="relation-type">guarantee</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Person</span></div>
+            <div class="relation-row"><span class="relation-end">Company</span><span class="relation-arrow">&rarr;</span><span class="relation-type">guarantee</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Company</span></div>
+            <div class="relation-row"><span class="relation-end">Person</span><span class="relation-arrow">&rarr;</span><span class="relation-type">invest</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Company</span></div>
+            <div class="relation-row"><span class="relation-end">Company</span><span class="relation-arrow">&rarr;</span><span class="relation-type">invest</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Company</span></div>
+            <div class="relation-row"><span class="relation-end">Person</span><span class="relation-arrow">&rarr;</span><span class="relation-type">workIn</span><span class="relation-arrow">&rarr;</span><span class="relation-end">Company</span></div>
+          </div>
+          <figcaption class="diagram-caption">Edges carry their FinBench event properties: time/order, amount, organization, relation, ratio, or comment as defined for each relationship. Multiple transfer events may connect the same account pair.</figcaption>
+        </div>
+      </figure>
+      <div class="table-wrap">
+        <table class="comparison-table">
+          <thead><tr><th>Technology</th><th>Logical-to-physical mapping</th><th>Primary schema concern</th></tr></thead>
+          <tbody>
+            <tr><td data-label="Technology">Neo4j</td><td data-label="Logical-to-physical mapping" class="logical">Typed logical edge maps to a native property-bearing relationship.</td><td data-label="Primary schema concern">Node identity, edge event identity, and selective indexes.</td></tr>
+            <tr><td data-label="Technology">Memcached</td><td data-label="Logical-to-physical mapping" class="logical">Typed logical edge maps to an application-serialized adjacency-list key/value.</td><td data-label="Primary schema concern">Direction, list size, update consistency, eviction, and rebuild.</td></tr>
+            <tr><td data-label="Technology">AWS Neptune</td><td data-label="Logical-to-physical mapping" class="logical">Typed logical edge is a native labeled, property-bearing edge traversed by the managed graph engine.</td><td data-label="Primary schema concern">Stable element identity, labels, event multiplicity, traversal fan-out, and instance capacity.</td></tr>
+            <tr><td data-label="Technology">Spanner Graph</td><td data-label="Logical-to-physical mapping" class="logical">Typed logical edge is a relational row projected by graph endpoint keys.</td><td data-label="Primary schema concern">Primary-key order, reverse access, and event multiplicity.</td></tr>
+            <tr><td data-label="Technology">Azure Cosmos DB</td><td data-label="Logical-to-physical mapping" class="logical">Typed logical edge maps to a managed Gremlin graph item in a partition.</td><td data-label="Primary schema concern">Partition locality, hot keys, indexing policy, and RU budget.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note"><strong>Fair comparison boundary:</strong> the logical query is the same exact-depth transfer walk, but the physical work is not. Native graph expansion, client-side cache expansion, and relational joins have different network, index, and partition costs. Treat measured numbers as results for these specific adapter paths, not as a pure storage-engine ranking.</div>
+    </section>
+
+    <section class="engine" id="neo4j">
+      <div class="engine-heading"><h2>Neo4j</h2><span class="tag">Native property graph</span></div>
+      <figure class="model-diagrams" aria-label="Complete Neo4j physical model for LDBC FinBench">
+        <div class="diagram-panel"><h3>Physical vertex records</h3><div class="entity-types">
+          <div class="entity-type"><strong>(:Person)</strong><small>{id, FinBench Person properties}</small></div><div class="entity-type"><strong>(:Company)</strong><small>{id, FinBench Company properties}</small></div><div class="entity-type"><strong>(:Account)</strong><small>{id, FinBench Account properties}</small></div><div class="entity-type"><strong>(:Loan)</strong><small>{id, FinBench Loan properties}</small></div><div class="entity-type"><strong>(:Medium)</strong><small>{id, FinBench Medium properties}</small></div>
+        </div><figcaption class="diagram-caption">All five logical entity types map to labeled nodes with their full FinBench property sets.</figcaption></div>
+        <div class="diagram-panel"><h3>Physical relationship records</h3><div class="physical-mapping">
+        <div class="diagram-panel"><h3>Physical relationship records</h3><div class="physical-mapping">
+          <div class="physical-row"><strong>Account → Account · transfer</strong><span><code>[:transfer]</code> {createTime, amount, order}</span></div>
+          <div class="physical-row"><strong>Account → Account · withdraw</strong><span><code>[:withdraw]</code> {createTime, amount}</span></div>
+          <div class="physical-row"><strong>Account → Loan</strong><span><code>[:repay]</code> {createTime, amount}</span></div>
+          <div class="physical-row"><strong>Loan → Account</strong><span><code>[:deposit]</code> {createTime, amount}</span></div>
+          <div class="physical-row"><strong>Medium → Account</strong><span><code>[:signIn]</code> {createTime}</span></div>
+          <div class="physical-row"><strong>Person → Account</strong><span><code>[:own]</code> {createTime}</span></div>
+          <div class="physical-row"><strong>Company → Account</strong><span><code>[:own]</code> {createTime}</span></div>
+          <div class="physical-row"><strong>Person → Loan</strong><span><code>[:apply]</code> {createTime, organization}</span></div>
+          <div class="physical-row"><strong>Company → Loan</strong><span><code>[:apply]</code> {createTime, organization}</span></div>
+          <div class="physical-row"><strong>Person → Person</strong><span><code>[:guarantee]</code> {createTime, relation}</span></div>
+          <div class="physical-row"><strong>Company → Company</strong><span><code>[:guarantee]</code> {createTime, relation}</span></div>
+          <div class="physical-row"><strong>Person → Company · invest</strong><span><code>[:invest]</code> {createTime, ratio}</span></div>
+          <div class="physical-row"><strong>Person → Company · workIn</strong><span><code>[:workIn]</code> {createTime, comment}</span></div>
+          <div class="physical-row"><strong>Company → Company</strong><span><code>[:invest]</code> {createTime, ratio}</span></div>
+        </div><figcaption class="diagram-caption">Native directed edges retain each FinBench relationship label and edge properties.</figcaption></div>
+      </figure>
+      <section class="storage-examples">
+        <h3>Sample stored relations</h3>
+        <p>Cypher-style property-graph records. Repeated transfer events are separate relationship records; these examples show graph-level data, not Neo4j's internal byte layout.</p>
+        <pre><code>(:Account {id: 10001})-[:transfer {createTime: 1710000000000, amount: 5000, order: 2}]-&gt;(:Account {id: 10002})
+(:Person {id: 501})-[:own {createTime: 1710000000000}]-&gt;(:Account {id: 10001})
+(:Account {id: 10001})-[:repay {createTime: 1710000005000, amount: 125}]-&gt;(:Loan {id: 9001})</code></pre>
+      </section>
+      <div class="engine-grid">
+        <section><h3>Logical relations & traversal</h3><p>Each entity is a labeled node; each relation is a directed, typed edge with its own properties. Cypher expresses a k-hop walk as <code>-[:transfer* k]-&gt;</code>. The repository's Cypher path returns up to ten endpoints; DirectedTrail instead matches a fixed-depth path to a target. The Cypher form does not explicitly forbid revisiting nodes.</p></section>
+        <section><h3>Physical model</h3><p>Identity is represented by each node label plus <code>id</code>. The schema creates uniqueness constraints for the five node labels, property indexes for common node filters, and relationship-property indexes for timestamps, amounts, and order fields. Relationships remain native graph records rather than join rows.</p></section>
+        <section><h3>Schema changes to consider</h3><ul><li>Keep stable, unique node IDs and the existing label-specific uniqueness constraints.</li><li>Choose relationship identity semantics deliberately: transfer events may repeat, while bulk reloads should not accidentally duplicate the same event. Add an event ID or a deterministic idempotency key if ingestion retries require it.</li><li>Retain indexes only for measured start-node lookups and selective filters; validate relationship-property indexes against actual predicates because they do not replace adjacency expansion.</li><li>Use label/type and property constraints to validate required fields and temporal/amount types at ingestion boundaries.</li></ul></section>
+        <section><h3>Implementation note</h3><p>The direct exporter uses <code>MERGE</code> for vertices, then <code>CREATE</code> for relationships. Thus vertex loads are idempotent by label/id, while repeated edge loads can create duplicates unless the ingestion process is controlled or edge identity is added.</p></section>
+      </div>
+    </section>
+
+    <section class="engine" id="memcached">
+      <div class="engine-heading"><h2>Memcached</h2><span class="tag">Application-managed adjacency cache</span></div>
+      <figure class="model-diagrams" aria-label="Complete Memcached physical model for LDBC FinBench">
+        <div class="diagram-panel"><h3>Physical vertex keys</h3><div class="entity-types">
+          <div class="entity-type"><strong>Person</strong><small>v:Person:{id} → entity JSON</small></div><div class="entity-type"><strong>Company</strong><small>v:Company:{id} → entity JSON</small></div><div class="entity-type"><strong>Account</strong><small>v:Account:{id} → entity JSON</small></div><div class="entity-type"><strong>Loan</strong><small>v:Loan:{id} → entity JSON</small></div><div class="entity-type"><strong>Medium</strong><small>v:Medium:{id} → entity JSON</small></div>
+        </div><figcaption class="diagram-caption">Entity values contain the corresponding full FinBench property sets.</figcaption></div>
+        <div class="diagram-panel"><h3>Physical adjacency keys</h3><div class="physical-mapping">
+          <div class="physical-row"><strong>Account → Account · transfer</strong><span><code>adj:out:Account:{id}:transfer</code> → edge array with destination and event properties</span></div>
+          <div class="physical-row"><strong>Account → Account · withdraw</strong><span><code>adj:out:Account:{id}:withdraw</code> → edge array with destination and event properties</span></div>
+          <div class="physical-row"><strong>Account → Loan</strong><span><code>adj:out:Account:{id}:repay</code> → loan IDs and repayment properties</span></div>
+          <div class="physical-row"><strong>Loan → Account</strong><span><code>adj:out:Loan:{id}:deposit</code> → account IDs and deposit properties</span></div>
+          <div class="physical-row"><strong>Medium → Account</strong><span><code>adj:out:Medium:{id}:signIn</code> → account IDs and timestamps</span></div>
+          <div class="physical-row"><strong>Person → Account · own</strong><span><code>adj:out:Person:{id}:own</code> → account IDs and ownership properties</span></div>
+          <div class="physical-row"><strong>Company → Account · own</strong><span><code>adj:out:Company:{id}:own</code> → account IDs and ownership properties</span></div>
+          <div class="physical-row"><strong>Person → Loan · apply</strong><span><code>adj:out:Person:{id}:apply</code> → loan IDs and application properties</span></div>
+          <div class="physical-row"><strong>Company → Loan · apply</strong><span><code>adj:out:Company:{id}:apply</code> → loan IDs and application properties</span></div>
+          <div class="physical-row"><strong>Person → Person · guarantee</strong><span><code>adj:out:Person:{id}:guarantee</code> → person IDs and guarantee properties</span></div>
+          <div class="physical-row"><strong>Company → Company · guarantee</strong><span><code>adj:out:Company:{id}:guarantee</code> → company IDs and guarantee properties</span></div>
+          <div class="physical-row"><strong>Person → Company · invest</strong><span><code>adj:out:Person:{id}:invest</code> → company IDs and investment properties</span></div>
+          <div class="physical-row"><strong>Company → Company · invest</strong><span><code>adj:out:Company:{id}:invest</code> → company IDs and investment properties</span></div>
+          <div class="physical-row"><strong>Person → Company</strong><span><code>adj:out:Person:{id}:workIn</code></span></div>
+        </div><figcaption class="diagram-caption">Each edge value is an outgoing JSON adjacency array keyed by source type, source ID, and relation label.</figcaption>
+          <p class="physical-note">Full FinBench mapping shown; the current exporter does not yet encode all polymorphic source types and relation fields consistently.</p></div>
+      </figure>
+      <section class="storage-examples">
+        <h3>Sample stored relations</h3>
+        <p>Each source/type list is one JSON string value. The transfer and Person ownership keys match the exporter shape; deposit illustrates another source entity type.</p>
+        <pre><code>key: adj:out:Account:10001:transfer
+value: [{"fromId":10001,"toId":10002,"createTime":1710000000000,"amount":5000,"order":2},
+        {"fromId":10001,"toId":10003,"createTime":1710000001000,"amount":800,"order":3}]
+
+key: adj:out:Person:501:own
+value: [{"ownerId":501,"ownerType":"Person","accountId":10001,"createTime":1710000000000}]
+
+key: adj:out:Loan:9001:deposit
+value: [{"loanId":9001,"accountId":10001,"createTime":1710000005000,"amount":200}]</code></pre>
+      </section>
+      <div class="engine-grid">
+        <section><h3>Logical relations & traversal</h3><p>Relations are JSON edge records grouped by source entity, source ID, and edge type. A traversal is application code: MultiGet expands a frontier with a configured beam width; DFS follows the first outgoing edge at each hop. The cache does not parse or enforce graph semantics.</p></section>
+        <section><h3>Physical model</h3><p>Vertices use keys such as <code>v:Account:10001</code>. Outgoing edges use <code>adj:out:Account:10001:transfer</code> with an array of edge records, including their destination and event properties. These values are volatile cache entries, not a durable source of truth.</p></section>
+        <section><h3>Schema changes to consider</h3><ul><li>Define canonical key encoding, edge field names, and type conversion once; the current exporter emits outgoing lists only even though the design document also describes incoming lists.</li><li>Add reverse adjacency keys only if reverse traversals are required, and ensure writes update both directions consistently.</li><li>Plan for cache expiry/eviction, rebuild from durable storage, and invalidation on updates or deletes.</li><li>Bound adjacency value sizes: split high-degree lists into pages/chunks and consider hot-key distribution for popular accounts.</li><li>Preserve event IDs and timestamps if repeated transfer records, temporal filtering, or deduplication matter.</li></ul></section>
+        <section><h3>Implementation note</h3><p>The exporter groups each edge batch by source and writes one JSON array per source/type key. The benchmark's BFS issues one multi-get per hop; DFS performs sequential gets, so depth adds round trips to DFS while breadth adds frontier size to BFS.</p></section>
+      </div>
+    </section>
+
+    <section class="engine" id="neptune">
+      <div class="engine-heading"><h2>AWS Neptune</h2><span class="tag">Managed property graph</span></div>
+      <figure class="model-diagrams" aria-label="Complete Neptune physical model for LDBC FinBench">
+        <div class="diagram-panel"><h3>Query-time vertex model</h3><div class="entity-types">
+          <div class="entity-type"><strong>Person</strong><small>Person vertex: id + FinBench properties</small></div><div class="entity-type"><strong>Company</strong><small>Company vertex: id + FinBench properties</small></div><div class="entity-type"><strong>Account</strong><small>Account vertex: id + FinBench properties</small></div><div class="entity-type"><strong>Loan</strong><small>Loan vertex: id + FinBench properties</small></div><div class="entity-type"><strong>Medium</strong><small>Medium vertex: id + FinBench properties</small></div>
+        </div><figcaption class="diagram-caption">At query time, Gremlin traverses Neptune's managed labeled vertices and adjacency structures.</figcaption></div>
+        <div class="diagram-panel"><h3>Query-time edge model</h3><div class="physical-mapping">
+          <div class="physical-row"><strong>Account → Account · transfer</strong><span><code>(:Account)-[:transfer {createTime, amount, order}]-&gt;(:Account)</code></span></div>
+          <div class="physical-row"><strong>Account → Account · withdraw</strong><span><code>(:Account)-[:withdraw {createTime, amount}]-&gt;(:Account)</code></span></div>
+          <div class="physical-row"><strong>Account → Loan · repay</strong><span><code>(:Account)-[:repay {createTime, amount}]-&gt;(:Loan)</code></span></div>
+          <div class="physical-row"><strong>Loan → Account · deposit</strong><span><code>(:Loan)-[:deposit {createTime, amount}]-&gt;(:Account)</code></span></div>
+          <div class="physical-row"><strong>Medium → Account · signIn</strong><span><code>(:Medium)-[:signIn {createTime}]-&gt;(:Account)</code></span></div>
+          <div class="physical-row"><strong>Person → Account · own</strong><span><code>(:Person)-[:own {createTime}]-&gt;(:Account)</code></span></div>
+          <div class="physical-row"><strong>Company → Account · own</strong><span><code>(:Company)-[:own {createTime}]-&gt;(:Account)</code></span></div>
+          <div class="physical-row"><strong>Person → Loan · apply</strong><span><code>(:Person)-[:apply {createTime, organization}]-&gt;(:Loan)</code></span></div>
+          <div class="physical-row"><strong>Company → Loan · apply</strong><span><code>(:Company)-[:apply {createTime, organization}]-&gt;(:Loan)</code></span></div>
+          <div class="physical-row"><strong>Person → Person · guarantee</strong><span><code>(:Person)-[:guarantee {createTime, relation}]-&gt;(:Person)</code></span></div>
+          <div class="physical-row"><strong>Company → Company · guarantee</strong><span><code>(:Company)-[:guarantee {createTime, relation}]-&gt;(:Company)</code></span></div>
+          <div class="physical-row"><strong>Person → Company · invest</strong><span><code>(:Person)-[:invest {createTime, ratio}]-&gt;(:Company)</code></span></div>
+          <div class="physical-row"><strong>Company → Company · invest</strong><span><code>(:Company)-[:invest {createTime, ratio}]-&gt;(:Company)</code></span></div>
+          <div class="physical-row"><strong>Person → Company · workIn</strong><span><code>(:Person)-[:workIn {createTime, comment}]-&gt;(:Company)</code></span></div>
+        </div><figcaption class="diagram-caption">The 14 endpoint variants are native directed edges; properties can be examined during multi-hop graph queries.</figcaption>
+          <p class="physical-note">The repository exporter writes Neptune-formatted CSV for ingestion; that file format is not Neptune's query-time storage model.</p></div>
+      </figure>
+      <section class="storage-examples">
+        <h3>Sample stored relations</h3>
+        <p>Gremlin API-level examples of native Neptune vertices and edges. Neptune manages the underlying storage records; these are not bulk-loader rows or a claim about its internal format.</p>
+        <pre><code>g.V().has('Account', 'id', 10001).addE('transfer')
+  .to(g.V().has('Account', 'id', 10002))
+  .property('createTime', 1710000000000).property('amount', 5000).property('order', 2)
+
+g.V().has('Person', 'id', 501).addE('own')
+  .to(g.V().has('Account', 'id', 10001)).property('createTime', 1710000000000)
+
+g.V().has('Account', 'id', 10001).addE('repay')
+  .to(g.V().has('Loan', 'id', 9001))
+  .property('createTime', 1710000005000).property('amount', 125)</code></pre>
+      </section>
+      <div class="engine-grid">
+        <section><h3>Logical relations & traversal</h3><p>Vertices and edges have labels; edges are directed and may carry properties. Gremlin expresses the benchmark traversal as <code>g.V().has('Account','id',id).repeat(out('transfer')).times(k)</code>. The adapter also constructs openCypher variable-length paths and SPARQL property paths, although only the Gremlin route is represented in this saved run.</p></section>
+        <section><h3>Production query model</h3><p>At query time, Neptune stores and traverses native labeled vertices and property-bearing edges through the managed graph engine; the underlying storage layout is service-managed. This repository writes Neptune bulk-loader CSV with <code>~id</code>, <code>~label</code>, <code>~from</code>, and <code>~to</code> fields as an ingestion format, not as the runtime model.</p></section>
+        <section><h3>Schema changes to consider</h3><ul><li>Keep vertex IDs globally unambiguous across labels; the exporter prefixes IDs with entity type.</li><li>Use stable unique edge IDs, especially for repeated transfers and repeatable bulk loads; validate the current generated ID scheme against the source event key.</li><li>Keep labels and property names/types consistent across loader CSV and query text; validate endpoint references before loading.</li><li>Choose property cardinality and indexing behavior based on deployed Neptune engine/version and actual predicates; don't assume relational-style user-created indexes from this sample.</li><li>For production bulk loads, define a durable object-store staging process and load/retry validation; the local exporter currently writes CSV files.</li></ul></section>
+        <section><h3>Implementation note</h3><p>The schema file documents labels and a sample Gremlin traversal rather than executable DDL. Its sample uses <code>simplePath()</code>, while the benchmark adapter's Gremlin query does not, so cycle avoidance is not identical between the example and measured path.</p></section>
+      </div>
+    </section>
+
+    <section class="engine" id="spanner">
+      <div class="engine-heading"><h2>Google Cloud Spanner Graph</h2><span class="tag">Graph view over relational tables</span></div>
+      <figure class="model-diagrams" aria-label="Complete Spanner Graph physical model for LDBC FinBench">
+        <div class="diagram-panel"><h3>Physical node tables</h3><div class="entity-types">
+          <div class="entity-type"><strong>Person</strong><small>Person(id PK, FinBench properties)</small></div><div class="entity-type"><strong>Company</strong><small>Company(id PK, FinBench properties)</small></div><div class="entity-type"><strong>Account</strong><small>Account(id PK, FinBench properties)</small></div><div class="entity-type"><strong>Loan</strong><small>Loan(id PK, FinBench properties)</small></div><div class="entity-type"><strong>Medium</strong><small>Medium(id PK, FinBench properties)</small></div>
+        </div><figcaption class="diagram-caption">The property graph declares these five relational tables as its node tables.</figcaption></div>
+        <div class="diagram-panel"><h3>Physical edge tables and graph labels</h3><div class="physical-mapping">
+        <div class="diagram-panel"><h3>Physical edge tables and graph labels</h3><div class="physical-mapping">
+          <div class="physical-row"><strong>Account → Account · transfer</strong><span><code>Transfer</code> → transfer</span></div>
+          <div class="physical-row"><strong>Account → Account · withdraw</strong><span><code>Withdraw</code> → withdraw</span></div>
+          <div class="physical-row"><strong>Account → Loan</strong><span><code>Repay</code> → repay</span></div>
+          <div class="physical-row"><strong>Loan → Account</strong><span><code>Deposit</code> → deposit</span></div>
+          <div class="physical-row"><strong>Medium → Account</strong><span><code>SignIn</code> → signIn</span></div>
+          <div class="physical-row"><strong>Person → Account</strong><span><code>PersonOwnAccount</code> → own</span></div>
+          <div class="physical-row"><strong>Company → Account</strong><span><code>CompanyOwnAccount</code> → own</span></div>
+          <div class="physical-row"><strong>Person → Loan</strong><span><code>PersonApplyLoan</code> → apply</span></div>
+          <div class="physical-row"><strong>Company → Loan</strong><span><code>CompanyApplyLoan</code> → apply</span></div>
+          <div class="physical-row"><strong>Person → Person</strong><span><code>PersonGuaranteePerson</code> → guarantee</span></div>
+          <div class="physical-row"><strong>Company → Company</strong><span><code>CompanyGuaranteeCompany</code> → guarantee</span></div>
+          <div class="physical-row"><strong>Person → Company · invest</strong><span><code>Invest</code> → invest</span></div>
+          <div class="physical-row"><strong>Company → Company</strong><span><code>CompanyInvestCompany</code> → invest (required mapping; not in current DDL)</span></div>
+          <div class="physical-row"><strong>Person → Company · workIn</strong><span><code>WorkIn</code> → workIn</span></div>
+        </div><figcaption class="diagram-caption">Edge rows carry endpoint keys and FinBench edge properties; the property graph maps those keys to source and destination node tables.</figcaption>
+          <p class="physical-note">Current DDL uses flat, non-interleaved tables. Consider interleaving each edge table under its source entity table (source ID first) to improve outgoing-traversal locality; reverse lookups may need destination-first secondary indexes and add write/storage cost. This is a design option, not applied here. The current graph definition also includes only Person → Company for <code>Invest</code>; Company → Company investment needs its own edge mapping or a deliberate unified-table design.</p></div>
+      </figure>
+      <section class="storage-examples">
+        <h3>Sample stored relations</h3>
+        <p>Representative relational rows and the graph labels projected from their endpoint keys. Values are illustrative; table and key names match the repository DDL.</p>
+        <pre><code>Transfer(fromId, toId, createTime, amount, orderNum)
+  (10001, 10002, 1710000000000, 5000, 2)  -- graph edge label: transfer
+
+PersonOwnAccount(personId, accountId, createTime)
+  (501, 10001, 1710000000000)            -- graph edge label: own
+
+Repay(accountId, loanId, createTime, amount)
+  (10001, 9001, 1710000005000, 125)      -- graph edge label: repay</code></pre>
+        <p>The current primary keys are source-first. Some association tables omit event time from their key, so they cannot retain repeated same-pair events even though the timestamp is a column.</p>
+      </section>
+      <div class="engine-grid">
+        <section><h3>Logical relations & traversal</h3><p>The property graph is declared over relational node and edge tables. Each edge-table row maps source and destination key columns to graph endpoints and receives a graph label. GQL uses a variable-length graph pattern. The SQL comparison bypasses graph traversal and joins the <code>Transfer</code> table repeatedly, in batches of at most five hops.</p></section>
+        <section><h3>Physical model</h3><p>Entity tables use <code>id</code> primary keys. Event edges such as <code>Transfer</code> use composite keys beginning with the source ID, then destination and timestamp. The graph definition maps edge tables to labels and endpoint node tables. The current DDL has no secondary indexes.</p></section>
+        <section><h3>Schema changes to consider</h3><ul><li>Choose primary-key prefix order from dominant access direction. Source-first keys suit outgoing traversals; add destination-first secondary indexes for reverse traversal and account for their write/storage cost.</li><li>Evaluate <code>INTERLEAVE IN PARENT</code> for source-owned edge rows when colocating a source entity and its outgoing edges benefits the workload; weigh reverse traversal and write concentration before choosing it.</li><li>Include a stable event discriminator or timestamp in the key wherever multiple edges between the same endpoints must coexist. The current <code>PersonOwnAccount</code>, <code>CompanyOwnAccount</code>, <code>PersonApplyLoan</code>, <code>CompanyApplyLoan</code>, and <code>WorkIn</code> primary keys omit timestamp and therefore cannot store multiple rows for the same endpoint pair.</li><li>Add secondary indexes for selective filters only after query-plan review; keep graph endpoint key columns aligned with the property-graph definition.</li></ul></section>
+        <section><h3>Implementation note</h3><p>The current graph definition maps ownership and application relations from different source types via separate tables that share graph labels. The benchmark's SQL variant only traverses transfers, so its SQL/GQL comparison does not exercise the full set of relation types.</p></section>
+      </div>
+    </section>
+
+    <section class="engine" id="cosmos">
+      <div class="engine-heading"><h2>Azure Cosmos DB Gremlin API</h2><span class="tag">Partitioned managed graph</span></div>
+      <figure class="model-diagrams" aria-label="Complete Cosmos DB physical model for LDBC FinBench">
+        <div class="diagram-panel"><h3>Physical vertex items (conceptual)</h3><div class="entity-types">
+          <div class="entity-type"><strong>Person</strong><small>vertex item: label, id, pk, all properties</small></div><div class="entity-type"><strong>Company</strong><small>vertex item: label, id, pk, all properties</small></div><div class="entity-type"><strong>Account</strong><small>vertex item: label, id, pk, all properties</small></div><div class="entity-type"><strong>Loan</strong><small>vertex item: label, id, pk, all properties</small></div><div class="entity-type"><strong>Medium</strong><small>vertex item: label, id, pk, all properties</small></div>
+        </div><figcaption class="diagram-caption">A partition key must be present on each graph item; exact document layout is managed by the Gremlin service.</figcaption></div>
+        <div class="diagram-panel"><h3>Physical labeled edge items (conceptual)</h3><div class="physical-mapping">
+          <div class="physical-row"><strong>Account → Account · transfer</strong><span>edge item label <code>transfer</code>; outV, inV, pk, {createTime, amount, order}</span></div>
+          <div class="physical-row"><strong>Account → Account · withdraw</strong><span>edge item label <code>withdraw</code>; outV, inV, pk, {createTime, amount}</span></div>
+          <div class="physical-row"><strong>Account → Loan</strong><span>edge item label <code>repay</code>; outV, inV, pk, {createTime, amount}</span></div>
+          <div class="physical-row"><strong>Loan → Account</strong><span>edge item label <code>deposit</code>; outV, inV, pk, {createTime, amount}</span></div>
+          <div class="physical-row"><strong>Medium → Account</strong><span>edge item label <code>signIn</code>; outV, inV, pk, {createTime}</span></div>
+          <div class="physical-row"><strong>Person → Account · own</strong><span>edge item label <code>own</code>; Person outV, Account inV, pk, {createTime}</span></div>
+          <div class="physical-row"><strong>Company → Account · own</strong><span>edge item label <code>own</code>; Company outV, Account inV, pk, {createTime}</span></div>
+          <div class="physical-row"><strong>Person → Loan · apply</strong><span>edge item label <code>apply</code>; Person outV, Loan inV, pk, {createTime, organization}</span></div>
+          <div class="physical-row"><strong>Company → Loan · apply</strong><span>edge item label <code>apply</code>; Company outV, Loan inV, pk, {createTime, organization}</span></div>
+          <div class="physical-row"><strong>Person → Person · guarantee</strong><span>edge item label <code>guarantee</code>; Person outV/inV, pk, {createTime, relation}</span></div>
+          <div class="physical-row"><strong>Company → Company · guarantee</strong><span>edge item label <code>guarantee</code>; Company outV/inV, pk, {createTime, relation}</span></div>
+          <div class="physical-row"><strong>Person → Company · invest</strong><span>edge item label <code>invest</code>; Person outV, Company inV, pk, {createTime, ratio}</span></div>
+          <div class="physical-row"><strong>Company → Company · invest</strong><span>edge item label <code>invest</code>; Company outV/inV, pk, {createTime, ratio}</span></div>
+          <div class="physical-row"><strong>Person → Company · workIn</strong><span>edge item label <code>workIn</code>; Person outV, Company inV, pk, {createTime, comment}</span></div>
+        </div><figcaption class="diagram-caption">Each of the ten relationship labels maps to a directed Gremlin edge item; the partition key affects traversal locality.</figcaption>
+          <p class="physical-note">Conceptual full FinBench mapping shown. This repository configures <code>/pk</code> but has no Cosmos exporter or executable edge-schema implementation.</p></div>
+      </figure>
+      <section class="storage-examples">
+        <h3>Sample stored relations</h3>
+        <p>Gremlin API-level examples of Cosmos graph elements. The service controls the physical item format; <code>/pk</code> is configured in Terraform, but this repository does not implement writes that establish these items.</p>
+        <pre><code>// Conceptual vertex and edge properties exposed through Gremlin
+Account vertex: {label: "Account", id: "10001", pk: "acct-10001", type: "debit"}
+Account vertex: {label: "Account", id: "10002", pk: "acct-10002", type: "credit"}
+transfer edge:  {label: "transfer", outV: "10001", inV: "10002",
+                 createTime: 1710000000000, amount: 5000, order: 2}
+
+own edge:       {label: "own", outV: "501", inV: "10001", createTime: 1710000000000}
+repay edge:     {label: "repay", outV: "10001", inV: "9001",
+                 createTime: 1710000005000, amount: 125}</code></pre>
+        <p>These are graph/API-level illustrations, not raw Cosmos backing documents. Verify how the chosen graph partition key is applied to both vertices and edges in the deployed API configuration.</p>
+      </section>
+      <div class="engine-grid">
+        <section><h3>Logical relations & traversal</h3><p>The Gremlin API exposes property-graph vertices and labeled edges. The adapter starts at an <code>Account</code> selected by <code>id</code> and follows outgoing <code>transfer</code> edges for exactly k steps. In a partitioned graph, where related items live determines whether each step stays local or incurs cross-partition work.</p></section>
+        <section><h3>Physical model</h3><p>The graph container is configured with partition-key path <code>/pk</code>; Terraform configures provisioned throughput. The schema note says all properties are indexed, but this repo has no Cosmos data exporter or executable graph schema creation beyond the Terraform graph/container setup and those comments.</p></section>
+        <section><h3>Schema changes to consider</h3><ul><li>Define what <code>pk</code> means and ensure every graph element is written with it. Align partitioning with the common start-vertex and traversal access pattern.</li><li>Assess whether related vertices and edges can be co-located without creating hot partitions for high-degree accounts; benchmark realistic skew and cross-partition traversal.</li><li>Make partition-key value available in point lookups where possible; label/id alone may require broader lookup work if it doesn't identify a partition.</li><li>Review indexing policy against actual property filters and write volume rather than relying on the schema note's blanket all-properties statement.</li><li>Make throughput mode and RU budget explicit for traversal depth and fan-out; exact hop count alone does not predict RU use.</li></ul></section>
+        <section><h3>Implementation note</h3><p>The Cosmos SQL alias is not currently a working path: the adapter's SQL mode does not connect, while the Gremlin mode is the implemented traversal. The Gremlin schema file is only a comment stub, so partition-key and indexing guidance should be treated as design intent, not proof that generated graph items currently contain <code>pk</code>.</p></section>
+      </div>
+    </section>
+
+    <section class="section" id="modeling-tradeoffs">
+      <h2>Database modeling types: strengths and tradeoffs</h2>
+      <p class="section-lead">Compare these designs as long-running services answering concurrent, bounded multi-hop reads over skewed financial graphs. The critical differences are query execution, degree/fan-out behavior, partition or key hotspots, and the capacity unit that eventually throttles or saturates.</p>
+      <div class="table-wrap">
+        <table class="comparison-table">
+          <thead><tr><th>Technology</th><th>Production query model</th><th>Who executes hops</th><th>Capacity control and likely bottleneck</th></tr></thead>
+          <tbody>
+            <tr><td data-label="Technology">Neo4j</td><td data-label="Production query model">Native property-graph adjacency and path operators</td><td data-label="Hop execution">Database engine expands edges per query</td><td data-label="Capacity">Provisioned compute/memory and cluster topology; high-degree vertices can dominate traversal work</td></tr>
+            <tr><td data-label="Technology">Memcached</td><td data-label="Production query model">Application-owned adjacency-list cache</td><td data-label="Hop execution">Client performs one or more key gets per hop</td><td data-label="Capacity">Finite shard RAM and item-size setting; a hot adjacency key stays on one shard and can saturate it</td></tr>
+            <tr><td data-label="Technology">AWS Neptune</td><td data-label="Production query model">Managed native property graph</td><td data-label="Hop execution">Neptune engine executes Gremlin traversal</td><td data-label="Capacity">Selected instance/replica resources and service quotas; broad high-degree expansion increases query resource use</td></tr>
+            <tr><td data-label="Technology">Spanner Graph</td><td data-label="Production query model">Relational edge rows exposed as a graph</td><td data-label="Hop execution">GQL graph engine, or client-submitted SQL joins</td><td data-label="Capacity">Provisioned nodes and key/split distribution; hot source prefixes or concentrated interleaved rows can limit throughput</td></tr>
+            <tr><td data-label="Technology">Azure Cosmos DB</td><td data-label="Production query model">Partitioned managed Gremlin graph</td><td data-label="Hop execution">Gremlin service executes traversal across partitions</td><td data-label="Capacity">Provisioned RU/s and per-partition limits; hot partition throttling can occur before account-wide RU/s is exhausted</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tradeoff-grid">
+        <article class="tradeoff-card">
+          <h3>Neo4j</h3><div class="tradeoff-type">Graph-native model</div>
+          <div class="tradeoff-points"><div><h4>Strengths</h4><p>Database-side path expansion avoids an application round trip for every hop; native adjacency and typed edge properties fit variable-length queries. Identity indexes locate the starting vertex.</p></div><div><h4>Tradeoffs</h4><p>Runtime grows with visited edges and branching factor; large unbounded path patterns can consume CPU and memory. Use selective starts, depth/frontier bounds, and query plans for production traffic.</p></div><div class="capacity-watch"><h4>Capacity watch</h4><p>Size memory/page cache and compute for the hot working set and concurrent traversal load. A supernode remains expensive even in a highly available cluster; availability replicas do not make fan-out free. No universal graph-size cap is assumed here: practical capacity depends on deployment topology and workload.</p></div></div>
+        </article>
+        <article class="tradeoff-card">
+          <h3>Memcached</h3><div class="tradeoff-type">Application-managed key-value graph cache, not a graph database</div>
+          <div class="tradeoff-points"><div><h4>Strengths</h4><p>Key lookups and batched frontier fetches can serve bounded, read-heavy hops with low per-lookup overhead. The application can pre-shape adjacency for a known query mix.</p></div><div><h4>Tradeoffs</h4><p>Every BFS layer adds client coordination and network work; DFS adds serial round trips. The client must maintain edge integrity, reverse access, freshness, and fallback behavior after cache misses.</p></div><div class="capacity-watch"><h4>Capacity watch</h4><p>Total memory is finite across shards, but a single hot adjacency key is owned by one shard and cannot be spread by adding nodes. Large adjacency values approach the configured item-size limit; chunk or page them, watch hot-key QPS, and account for eviction.</p></div></div>
+        </article>
+        <article class="tradeoff-card">
+          <h3>AWS Neptune</h3><div class="tradeoff-type">Managed graph-native model</div>
+          <div class="tradeoff-points"><div><h4>Strengths</h4><p>Gremlin traversals run in the graph service over native edge adjacency, avoiding application-managed hop-by-hop fetching. Managed replicas and supported query interfaces can fit graph-serving systems.</p></div><div><h4>Tradeoffs</h4><p>Traversal plans and resource behavior are service/version specific, and broad expansion can dominate latency. Managed storage limits low-level control; validate Gremlin semantics, concurrency, and observed throttling on the deployed engine.</p></div><div class="capacity-watch"><h4>Capacity watch</h4><p>Compute is bounded by the selected instance classes and service quotas; reader capacity can help read throughput but does not eliminate one query's high-degree expansion. Monitor CPU/memory pressure and query latency, and bound depth/fan-out.</p></div></div>
+        </article>
+        <article class="tradeoff-card">
+          <h3>Google Cloud Spanner Graph</h3><div class="tradeoff-type">Relational physical model with graph projection</div>
+          <div class="tradeoff-points"><div><h4>Strengths</h4><p>GQL evaluates graph patterns over a relationally defined schema; provisioned nodes support predictable concurrent service capacity. Source-first edge keys or source-parent interleaving can keep common outgoing edges near their owner.</p></div><div><h4>Tradeoffs</h4><p>GQL and hand-built SQL joins are distinct query plans and should not be treated as the same traversal engine. Key order, interleaving, and indexes trade outgoing locality against reverse access and write distribution.</p></div><div class="capacity-watch"><h4>Capacity watch</h4><p>Adding nodes increases provisioned capacity, but uneven key ranges and high-traffic source IDs can still hotspot splits. Interleaving may concentrate a parent's edge rows; monitor split/transaction latency and design reverse indexes only for measured paths.</p></div></div>
+        </article>
+        <article class="tradeoff-card">
+          <h3>Azure Cosmos DB Gremlin API</h3><div class="tradeoff-type">Managed graph with partition-keyed storage</div>
+          <div class="tradeoff-points"><div><h4>Strengths</h4><p>Gremlin keeps traversal expressed as graph operations while provisioned request units can be adjusted for a production workload. The service manages partitioned graph storage.</p></div><div><h4>Tradeoffs</h4><p>Cross-partition traversal adds request work and latency; a partition key optimized for one traversal may distribute other access patterns poorly. RU cost rises with depth, fan-out, and returned data.</p></div><div class="capacity-watch"><h4>Capacity watch</h4><p>Account-wide RU/s is not a guarantee that every partition can serve that rate: a hot logical partition can throttle while other capacity is idle. High-degree accounts can create hot partitions; partition throughput and storage ceilings are service/version-specific, so validate current quotas and skewed load.</p></div></div>
+        </article>
+      </div>
+      <div class="note"><strong>How to read this comparison:</strong> Neo4j and Neptune place graph semantics in the database; Spanner stores relational rows and projects them as a graph; Cosmos exposes a graph API over partitioned managed storage; Memcached stores application-encoded adjacency and has no native graph semantics. Benchmark results therefore compare these implemented access paths, not equivalent levels of database functionality.</div>
+    </section>
+
+    <section class="section" id="modeling-takeaways">
+      <h2>Cross-engine schema decisions</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Decision</th><th>Why it matters</th><th>Model-level guidance</th></tr></thead>
+          <tbody>
+            <tr><td>Identity vs. event multiplicity</td><td>Vertex identity and repeated relationship events have different uniqueness rules.</td><td>Use stable entity keys; give event edges their own key or discriminator where retry safety and duplicate events must be distinguished.</td></tr>
+            <tr><td>Traversal direction</td><td>Outgoing access is not automatically efficient or available in reverse.</td><td>Plan source and destination access paths: native graph adjacency, reverse cache keys, destination-first indexes, or partition-aware lookups.</td></tr>
+            <tr><td>Temporal predicates</td><td>Filtering by event time/order changes useful indexes and edge keys.</td><td>Preserve timestamp/order as edge properties and include them in key/index design when they participate in uniqueness or range scans.</td></tr>
+            <tr><td>Fan-out and hot vertices</td><td>Large frontiers, oversized adjacency values, and skewed accounts can dominate latency and capacity.</td><td>Model degree distributions, cap or page expansion deliberately, and validate partition/key distribution with skewed data.</td></tr>
+            <tr><td>Durability and ingestion</td><td>Graph stores, relational tables, and an in-memory cache have different persistence and retry guarantees.</td><td>Choose a source of truth, define bulk-load/retry behavior, and make denormalized caches rebuildable and invalidatable.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>Model mapping is based on repository schemas, exporters, Terraform, and benchmark adapters. Validate exact engine behavior, index support, partition rules, and current cloud pricing against the deployed product/version before production changes.</footer>
+  </main>
+</body>
+</html>

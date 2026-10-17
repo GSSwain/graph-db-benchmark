@@ -1,0 +1,57 @@
+{
+  "vertex_pattern": "v:{type}:{id}",
+  "outgoing_edges_pattern": "adj:out:{type}:{id}:{edge_type}",
+  "incoming_edges_pattern": "adj:in:{type}:{id}:{edge_type}",
+  "edge_record_structure": {
+    "transfer": [
+      "dst",
+      "amount",
+      "createTime",
+      "order"
+    ],
+    "withdraw": [
+      "dst",
+      "amount",
+      "createTime"
+    ],
+    "repay": [
+      "dst",
+      "amount",
+      "createTime"
+    ],
+    "deposit": [
+      "dst",
+      "amount",
+      "createTime"
+    ],
+    "signIn": [
+      "dst",
+      "createTime"
+    ],
+    "own": [
+      "dst",
+      "createTime"
+    ],
+    "apply": [
+      "dst",
+      "createTime",
+      "organization"
+    ],
+    "guarantee": [
+      "dst",
+      "createTime",
+      "relation"
+    ],
+    "invest": [
+      "dst",
+      "createTime",
+      "ratio"
+    ],
+    "workIn": [
+      "dst",
+      "createTime",
+      "comment"
+    ]
+  },
+  "max_multi_get_batch_size": 1000
+}

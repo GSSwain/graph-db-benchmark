@@ -1,0 +1,15 @@
+{
+  "database": "finbench",
+  "graph_collection": "graph",
+  "partition_key": "/pk",
+  "indexing_policy": {
+    "indexingMode": "consistent",
+    "automatic": true,
+    "includedPaths": [
+      {
+        "path": "/*"
+      }
+    ]
+  },
+  "throughput_ru": 10000
+}

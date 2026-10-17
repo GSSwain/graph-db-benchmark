@@ -1,0 +1,125 @@
+services:
+  # =================================================================
+  # 1. Neo4j Graph Database
+  # =================================================================
+  neo4j:
+    image: neo4j:5.18.0-community
+    container_name: neo4j
+    ports:
+      - "7474:7474"   # HTTP Browser
+      - "7687:7687"   # Bolt Protocol
+    environment:
+      - NEO4J_AUTH=neo4j/benchmarkpassword
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_memory_heap_initial__size=1G
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
+    volumes:
+      - neo4j-data:/data
+      - ./schemas/neo4j:/var/lib/neo4j/import
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+
+  # =================================================================
+  # 2. Memcached In-Memory Graph Adjacency Cache
+  # =================================================================
+  memcached:
+    image: memcached:1.6-alpine
+    container_name: memcached
+    ports:
+      - "11211:11211"
+    command: memcached -m 2048 -c 4096 -t 4
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 11211 || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  # =================================================================
+  # 3. AWS Neptune Emulator (Apache TinkerPop Gremlin Server)
+  # =================================================================
+  neptune-emulator:
+    image: tinkerpop/gremlin-server:3.7.0
+    container_name: neptune-emulator
+    ports:
+      - "8182:8182"
+    profiles: ["all", "neptune"]
+
+  # =================================================================
+  # 4. GCP Spanner Graph Emulator (ISO GQL Support)
+  # =================================================================
+  spanner-emulator:
+    image: gcr.io/cloud-spanner-emulator/emulator:latest
+    container_name: spanner-emulator
+    ports:
+      - "9010:9010"   # gRPC
+      - "9020:9020"   # REST
+    profiles: ["all", "spanner"]
+
+  # =================================================================
+  # 5. Azure Cosmos DB Emulator
+  # =================================================================
+  cosmos-emulator:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+    container_name: cosmos-emulator
+    ports:
+      - "8081:8081"
+      - "10250-10255:10250-10255"
+    environment:
+      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=5
+      - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false
+    profiles: ["cosmos"]
+
+  # =================================================================
+  # 6. Data Creator Container Capability
+  # =================================================================
+  data-generator:
+    build:
+      context: ./data-generator
+    container_name: data-generator
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      memcached:
+        condition: service_healthy
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=benchmarkpassword
+      - MEMCACHED_HOST=memcached
+      - MEMCACHED_PORT=11211
+    volumes:
+      - ./data:/app/data
+    command: ["--preset", "dev", "--target", "neo4j,memcached", "--export-dir", "data", "--deep-hops", "100", "--chains", "10"]
+
+  # =================================================================
+  # 7. Test Runner Container Capability
+  # =================================================================
+  test-runner:
+    build:
+      context: ./test-runner
+    container_name: test-runner
+    depends_on:
+      - neo4j
+      - memcached
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=benchmarkpassword
+      - MEMCACHED_HOST=memcached
+      - MEMCACHED_PORT=11211
+      - NEPTUNE_ENDPOINT=ws://neptune-emulator:8182/gremlin
+      - SPANNER_EMULATOR_HOST=spanner-emulator:9010
+      - COSMOS_ENDPOINT=ws://cosmos-emulator:8182/gremlin
+    volumes:
+      - ./reports:/app/reports
+      - ./docs:/app/docs
+      - ./data:/app/data
+    command: ["--engines", "neo4j,memcached", "--hops", "1,2,3,4,5,6,7,8,9,10,15,20,30,40,50,75,100", "--iterations", "10", "--output-dir", "reports"]
+
+volumes:
+  neo4j-data:

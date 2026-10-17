@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: finbench-data-generator
+  namespace: benchmark
+spec:
+  completions: 100
+  parallelism: 20
+  completionMode: Indexed
+  template:
+    metadata:
+      labels:
+        app: finbench-data-generator
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: generator
+          image: finbench-data-generator:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: JOB_COMPLETION_INDEX
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['batch.kubernetes.io/job-completion-index']
+          command: ["python", "generator.py"]
+          args:
+            - "--scale-factor"
+            - "1.0"
+            - "--partitions"
+            - "100"
+            - "--partition-id"
+            - "$(JOB_COMPLETION_INDEX)"
+            - "--target"
+            - "neptune,spanner,cosmos"
+            - "--export-dir"
+            - "/mnt/storage/finbench-data"
+            - "--deep-hops"
+            - "100"
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /mnt/storage
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: finbench-pv-claim

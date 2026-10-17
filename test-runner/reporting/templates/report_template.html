@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LDBC FinBench - Performance Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #151e32;
+      --card-border: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
+      --indigo: #6366f1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.75rem;
+      margin-bottom: 2.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .meta-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .meta-badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 0.4rem 0.85rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--accent);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 1.75rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 1.25rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+    }
+    .cost-stat-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--card-border);
+      border-radius: 0.85rem;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .cost-stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--card-accent, #38bdf8);
+    }
+    .cost-stat-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .cost-stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+    .cost-stat-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.02);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+    }
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+    .metric-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 600;
+    }
+    .engine-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .chart-box {
+      position: relative;
+      height: 340px;
+    }
+    .info-list {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      padding-left: 1.25rem;
+      margin: 0;
+    }
+    .info-list li {
+      margin-bottom: 0.5rem;
+    }
+    .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>LDBC FinBench Performance</h1>
+        <p class="subtitle">
+          Multi-hop Read Traversal Performance (1 to 100 Hops)
+        </p>
+      </div>
+      <div class="meta-badges">
+        <span class="meta-badge">Generated: __TIMESTAMP__</span>
+        <span class="meta-badge">Concurrency: __CONCURRENCY__ Worker(s)</span>
+        <span class="meta-badge">Hop Progression: 1 &rarr; 100 Hops</span>
+        <a class="meta-badge" href="cost_report.html">Database cost report &rarr;</a>
+        <a class="meta-badge" href="modeling_report.html">Models & storage &rarr;</a>
+      </div>
+    </header>
+
+    <!-- Charts Section -->
+    <div class="grid-2">
+      <div class="card">
+        <h2>Hop Depth vs. Latency (p50 ms, 1 to 100 Hops)</h2>
+        <div class="chart-box">
+          <canvas id="latencyChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+      <div class="card">
+        <h2>Sustained Read Throughput (QPS) by Hop Depth</h2>
+        <div class="chart-box">
+          <canvas id="qpsChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Tail Latency (p99 Tail vs. p50 Median ms)</h2>
+        <div class="chart-box">
+          <canvas id="percentileChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hop-by-Hop Execution Table -->
+    <div class="card" style="margin-bottom: 2rem;">
+      <h2>Multi-Hop Benchmark Execution Trace (1 to 100 Hops)</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Query Language</th>
+              <th>Hop Depth</th>
+              <th>Completed Ops</th>
+              <th>Throughput (QPS)</th>
+              <th>p50 Latency (ms)</th>
+              <th>p90 Latency (ms)</th>
+              <th>p99 Latency (ms)</th>
+              <th>Max Latency (ms)</th>
+              <th>Errors</th>
+            </tr>
+          </thead>
+          <tbody>
+            __TABLE_ROWS__
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const chartData = __CHART_DATA_JSON__;
+
+    // 1. Latency Chart
+    new Chart(document.getElementById("latencyChart"), {
+      type: "line",
+      data: {
+        labels: chartData.hop_labels,
+        datasets: chartData.latency_datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { title: { display: true, text: "Hop Count (k)", color: "#94a3b8" }, grid: { color: "#1e293b" }, ticks: { color: "#cbd5e1" } },
+          y: { title: { display: true, text: "Latency (ms)", color: "#94a3b8" }, grid: { color: "#1e293b" }, ticks: { color: "#cbd5e1" } }
+        },
+        plugins: {
+          legend: { labels: { color: "#f8fafc" } }
+        }
+      }
+    });
+
+    // 2. QPS Chart
+    new Chart(document.getElementById("qpsChart"), {
+      type: "bar",
+      data: {
+        labels: chartData.hop_labels,
+        datasets: chartData.qps_datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { title: { display: true, text: "Hop Count", color: "#94a3b8" }, grid: { color: "#1e293b" }, ticks: { color: "#cbd5e1" } },
+          y: { title: { display: true, text: "Throughput (QPS)", color: "#94a3b8" }, grid: { color: "#1e293b" }, ticks: { color: "#cbd5e1" } }
+        },
+        plugins: {
+          legend: { labels: { color: "#f8fafc" } }
+        }
+      }
+    });
+
+    // 3. Tail Latency Chart
+    new Chart(document.getElementById("percentileChart"), {
+      type: "bar",
+      data: {
+        labels: chartData.engine_names,
+        datasets: [
+          { label: "p50 Median (ms)", data: chartData.engine_p50, backgroundColor: "#38bdf8" },
+          { label: "p99 Tail (ms)", data: chartData.engine_p99, backgroundColor: "#ef4444" }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { title: { display: true, text: "Latency (ms)", color: "#94a3b8" }, grid: { color: "#1e293b" }, ticks: { color: "#cbd5e1" } }
+        },
+        plugins: {
+          legend: { labels: { color: "#f8fafc" } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
