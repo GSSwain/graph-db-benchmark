@@ -1,6 +1,6 @@
 # LDBC FinBench Multi-Engine Benchmark Makefile
 
-.PHONY: help up down restart schema generate-data benchmark report clean verify
+.PHONY: help up down restart schema generate-data benchmark benchmark-all report clean verify
 
 help:
 	@echo "Available commands:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make schema         - Apply LDBC FinBench schema and constraints to Neo4j"
 	@echo "  make generate-data  - Generate synthetic FinBench data & 100-hop AML trails"
 	@echo "  make benchmark      - Run multi-hop benchmark (1 to 100 hops)"
+	@echo "  make benchmark-all  - Run all configured traversal mechanisms on reachable databases"
 	@echo "  make quickstart     - Run end-to-end quickstart in one command"
 	@echo "  make clean          - Clean generated data and reports"
 
@@ -34,6 +35,9 @@ generate-data:
 
 benchmark:
 	python3 test-runner/runner.py --engines neo4j,memcached --hops 1,2,3,4,5,6,7,8,9,10,15,20,30,40,50,75,100 --iterations 10 --output-dir reports
+
+benchmark-all:
+	python3 test-runner/runner.py --engines all --hops 1,2,3,4,5,10,20,50,100 --iterations 10 --output-dir reports --html-output-dir docs
 
 quickstart:
 	./scripts/quickstart.sh
