@@ -10,7 +10,9 @@ class Neo4jBenchmarkAdapter(BaseBenchmarkAdapter):
         language: str = "cypher"
     ):
         self.language = language.lower()
-        if self.language in ("trail", "directed_trail", "reachability"):
+        if self.language == "apoc":
+            self.name = "Neo4j-APOC-BFS"
+        elif self.language in ("trail", "directed_trail", "reachability"):
             self.name = "Neo4j-DirectedTrail"
         else:
             self.name = "Neo4j-Cypher"
@@ -46,7 +48,18 @@ class Neo4jBenchmarkAdapter(BaseBenchmarkAdapter):
         t0 = time.perf_counter_ns()
         try:
             with self.driver.session() as s:
-                if self.language in ("trail", "directed_trail") or mode == "reachability":
+                if self.language == "apoc":
+                    query = (
+                        "MATCH (a:Account {id: $start_id}) "
+                        "CALL apoc.path.expandConfig(a, {"
+                        "relationshipFilter: 'transfer>', "
+                        "minLevel: " + str(depth) + ", maxLevel: " + str(depth) + ", "
+                        "bfs: true, uniqueness: 'NODE_GLOBAL', limit: 10"
+                        "}) YIELD path "
+                        "RETURN last(nodes(path)).id AS target_id LIMIT 10"
+                    )
+                    res = s.run(query, start_id=start_id)
+                elif self.language in ("trail", "directed_trail") or mode == "reachability":
                     t_target = target_id if target_id else start_id + depth
                     query = (
                         "MATCH p = (a:Account {id: $start_id})-[:transfer*" + str(depth) + "]->(b:Account {id: $target_id}) "

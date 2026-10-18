@@ -6,6 +6,14 @@ from typing import Dict, Any, List
 from .cost_estimator import CostEstimator
 
 class BenchmarkReporter:
+    MECHANISM_COVERAGE = {
+        "Neo4j": ["Neo4j-Cypher", "Neo4j-DirectedTrail", "Neo4j-APOC-BFS"],
+        "Memcached": ["Memcached-MultiGet", "Memcached-DFS"],
+        "AWS Neptune": ["Neptune-Gremlin", "Neptune-openCypher", "Neptune-SPARQL"],
+        "Spanner Graph": ["Spanner-ISO-GQL", "Spanner-Relational-SQL"],
+        "Azure Cosmos DB": ["Cosmos-Gremlin", "Cosmos-Gremlin-Path"],
+    }
+
     def __init__(
         self,
         output_dir: str = "reports",
@@ -159,6 +167,17 @@ class BenchmarkReporter:
         with open(modeling_template_path, "r", encoding="utf-8") as f:
             modeling_template = f.read()
         modeling_html = modeling_template.replace("__TIMESTAMP__", ts_str)
+        coverage_rows = []
+        measured_mechanisms = set(results)
+        for technology, mechanisms in self.MECHANISM_COVERAGE.items():
+            for mechanism in mechanisms:
+                status = "Measured" if mechanism in measured_mechanisms else "Not measured"
+                coverage_rows.append(
+                    f'<tr><td data-label="Technology">{technology}</td>'
+                    f'<td data-label="Traversal mechanism">{mechanism}</td>'
+                    f'<td data-label="Run status">{status}</td></tr>'
+                )
+        modeling_html = modeling_html.replace("__MECHANISM_COVERAGE_ROWS__", "\n".join(coverage_rows))
         modeling_html_path = os.path.join(self.html_output_dir, "modeling_report.html")
         with open(modeling_html_path, "w", encoding="utf-8") as f:
             f.write(modeling_html)

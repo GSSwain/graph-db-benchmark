@@ -1,5 +1,6 @@
 import time
 import urllib.request
+import urllib.parse
 import json
 from typing import Dict, Any
 from .base import BaseBenchmarkAdapter
@@ -72,9 +73,14 @@ class NeptuneBenchmarkAdapter(BaseBenchmarkAdapter):
                 http_url = self.endpoint.replace("ws://", "http://").replace("wss://", "https://").replace("/gremlin", "/sparql")
                 q = "PREFIX : <http://finbench/> SELECT ?dst WHERE { :Account_" + str(start_id) + " (:transfer){" + str(depth) + "} ?dst } LIMIT 10"
                 data = urllib.parse.urlencode({"query": q}).encode("utf-8")
-                req = urllib.request.Request(http_url, data=data)
+                req = urllib.request.Request(
+                    http_url,
+                    data=data,
+                    headers={"Accept": "application/sparql-results+json"}
+                )
                 with urllib.request.urlopen(req, timeout=10) as resp:
-                    cnt = 1
+                    payload = json.loads(resp.read().decode("utf-8"))
+                    cnt = len(payload.get("results", {}).get("bindings", []))
             else:
                 cnt = 0
 

@@ -20,16 +20,16 @@ from reporting.reporter import BenchmarkReporter
 
 # Mapping of engine alias to query language variants
 ENGINE_VARIANTS = {
-    "neo4j": ["neo4j-cypher", "neo4j-trail"],
+    "neo4j": ["neo4j-cypher", "neo4j-trail", "neo4j-apoc"],
     "memcached": ["memcached-multiget", "memcached-dfs"],
-    "neptune": ["neptune-gremlin", "neptune-opencypher"],
+    "neptune": ["neptune-gremlin", "neptune-opencypher", "neptune-sparql"],
     "spanner": ["spanner-gql", "spanner-sql"],
-    "cosmos": ["cosmos-gremlin", "cosmos-sql"]
+    "cosmos": ["cosmos-gremlin", "cosmos-gremlin-path"]
 }
 
 def parse_args():
     parser = argparse.ArgumentParser(description="LDBC FinBench Multi-Engine & Multi-Language Graph Benchmark Runner")
-    parser.add_argument("--engines", type=str, default="neo4j,memcached", help="Target engines & query languages: neo4j (cypher, apoc), memcached (multiget, dfs), neptune (gremlin, opencypher), spanner (gql, sql), cosmos (gremlin, sql), all")
+    parser.add_argument("--engines", type=str, default="neo4j,memcached", help="Target mechanisms: Neo4j (Cypher, DirectedTrail, APOC), Memcached (MultiGet, DFS), Neptune (Gremlin, openCypher, SPARQL), Spanner (GQL, SQL), Cosmos Gremlin (endpoint, path-tracking), all")
     parser.add_argument("--hops", type=str, default=None, help="Comma-separated hop depths (e.g. 1,2,3,5,10,20,50,100)")
     parser.add_argument("--hop-range", type=int, nargs=2, default=None, help="Start and End hop depth (e.g. --hop-range 1 100)")
     parser.add_argument("--hop-step", type=int, default=1, help="Step for hop range (e.g. 1, 5, 10)")
@@ -102,6 +102,8 @@ def instantiate_adapter(target_name: str, config: BenchmarkConfig) -> Any:
     # Cosmos variants
     elif t == "cosmos-gremlin" or t == "cosmos":
         return CosmosBenchmarkAdapter(endpoint=config.cosmos_endpoint, language="gremlin")
+    elif t == "cosmos-gremlin-path":
+        return CosmosBenchmarkAdapter(endpoint=config.cosmos_endpoint, language="gremlin-path")
     elif t == "cosmos-sql":
         return CosmosBenchmarkAdapter(endpoint=config.cosmos_endpoint, language="sql")
 
