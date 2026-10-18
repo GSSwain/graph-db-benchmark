@@ -4,14 +4,14 @@ from .base import BaseBenchmarkAdapter
 
 class CosmosBenchmarkAdapter(BaseBenchmarkAdapter):
     def __init__(self, endpoint: str = "ws://localhost:8182/gremlin", language: str = "gremlin"):
-        self.language = language.lower() # "gremlin" or "sql"
-        name = "Cosmos-Gremlin" if self.language == "gremlin" else "Cosmos-SQL"
+        self.language = language.lower() # "gremlin" or "gremlin-path"
+        name = "Cosmos-Gremlin-Path" if self.language == "gremlin-path" else "Cosmos-Gremlin"
         super().__init__(name)
         self.endpoint = endpoint
         self.client = None
 
     def connect(self) -> bool:
-        if self.language == "gremlin":
+        if self.language in ("gremlin", "gremlin-path"):
             try:
                 from gremlin_python.driver.client import Client
                 self.client = Client(self.endpoint, "g")
@@ -29,7 +29,10 @@ class CosmosBenchmarkAdapter(BaseBenchmarkAdapter):
             return {"success": False, "latency_ms": 0.0, "result_count": 0, "error": "Not connected"}
         t0 = time.perf_counter_ns()
         try:
-            query = "g.V().has('Account', 'id', '" + str(start_id) + "').repeat(out('transfer')).times(" + str(depth) + ").limit(10)"
+            query = "g.V().has('Account', 'id', '" + str(start_id) + "').repeat(out('transfer')).times(" + str(depth) + ")"
+            if self.language == "gremlin-path":
+                query += ".simplePath().path()"
+            query += ".limit(10)"
             res = self.client.submit(query).all().result()
             lat_ms = (time.perf_counter_ns() - t0) / 1000000.0
             return {"success": True, "latency_ms": lat_ms, "result_count": len(res), "error": None}

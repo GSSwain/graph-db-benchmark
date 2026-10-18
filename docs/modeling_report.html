@@ -71,7 +71,7 @@
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     th, td { padding: 0.78rem 0.85rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
     th { color: var(--muted); background: var(--surface-raised); font-size: 0.73rem; text-transform: uppercase; }
-    .comparison-table th:first-child, .comparison-table td:first-child { width: 16%; }
+    .comparison-table th:first-child, .comparison-table td:first-child { width: 16%; white-space: nowrap; }
     .comparison-table th:nth-child(2), .comparison-table td:nth-child(2) { width: 42%; }
     .comparison-table th:nth-child(3), .comparison-table td:nth-child(3) { width: 42%; }
     td:first-child { color: var(--text); font-weight: 650; white-space: nowrap; }
@@ -219,7 +219,7 @@
 
     <p class="intro">The benchmark's logical graph is constant: typed financial entities connected by directed, typed, property-bearing relationships. What changes by engine is whether a relationship is a native graph edge, a row in an edge table, or an adjacency record addressed by a key. That physical choice determines which identifiers, indexes, partition keys, and denormalized copies the schema must provide.</p>
       <p class="intro">Reference model: the entity types, properties, and relationship endpoint variants follow the <a href="https://ldbcouncil.org/ldbc_finbench_docs/ldbc-finbench-specification.pdf" target="_blank" rel="noreferrer">LDBC FinBench specification</a>. Each physical diagram maps the complete logical inventory into that technology's storage model.</p>
-    <p>Page generated: 2026-10-17 10:13:27 UTC · Current-state notes below describe this repository's schemas and adapters; recommendations are modeling considerations, not claims that the benchmark has already implemented them.</p>
+    <p>Page generated: 2026-10-18 01:26:49 UTC · Current-state notes below describe this repository's schemas and adapters; recommendations are modeling considerations, not claims that the benchmark has already implemented them.</p>
     <div class="jump-links" aria-label="Jump to database">
       <a href="#neo4j">Neo4j</a>
       <a href="#memcached">Memcached</a>
@@ -227,6 +227,7 @@
       <a href="#spanner">Spanner Graph</a>
       <a href="#cosmos">Cosmos DB</a>
       <a href="#modeling-tradeoffs">Model tradeoffs</a>
+      <a href="#mechanism-coverage">Run coverage</a>
     </div>
 
     <section class="section" id="logical-model">
@@ -499,6 +500,28 @@ repay edge:     {label: "repay", outV: "10001", inV: "9001",
       </div>
     </section>
 
+    <section class="section" id="mechanism-coverage">
+      <h2>Traversal mechanisms measured in this run</h2>
+      <p class="section-lead">Coverage is derived from successful adapters in the generated benchmark summary. “Not measured” means no result was produced for that mechanism in this run; it may not have been requested, or its backend may not have been reachable or initialized.</p>
+      <div class="table-wrap">
+        <table class="comparison-table">
+          <thead><tr><th>Technology</th><th>Traversal mechanism</th><th>Run status</th></tr></thead>
+          <tbody><tr><td data-label="Technology">Neo4j</td><td data-label="Traversal mechanism">Neo4j-Cypher</td><td data-label="Run status">Measured</td></tr>
+<tr><td data-label="Technology">Neo4j</td><td data-label="Traversal mechanism">Neo4j-DirectedTrail</td><td data-label="Run status">Measured</td></tr>
+<tr><td data-label="Technology">Neo4j</td><td data-label="Traversal mechanism">Neo4j-APOC-BFS</td><td data-label="Run status">Measured</td></tr>
+<tr><td data-label="Technology">Memcached</td><td data-label="Traversal mechanism">Memcached-MultiGet</td><td data-label="Run status">Measured</td></tr>
+<tr><td data-label="Technology">Memcached</td><td data-label="Traversal mechanism">Memcached-DFS</td><td data-label="Run status">Measured</td></tr>
+<tr><td data-label="Technology">AWS Neptune</td><td data-label="Traversal mechanism">Neptune-Gremlin</td><td data-label="Run status">Not measured</td></tr>
+<tr><td data-label="Technology">AWS Neptune</td><td data-label="Traversal mechanism">Neptune-openCypher</td><td data-label="Run status">Not measured</td></tr>
+<tr><td data-label="Technology">AWS Neptune</td><td data-label="Traversal mechanism">Neptune-SPARQL</td><td data-label="Run status">Not measured</td></tr>
+<tr><td data-label="Technology">Spanner Graph</td><td data-label="Traversal mechanism">Spanner-ISO-GQL</td><td data-label="Run status">Not measured</td></tr>
+<tr><td data-label="Technology">Spanner Graph</td><td data-label="Traversal mechanism">Spanner-Relational-SQL</td><td data-label="Run status">Not measured</td></tr>
+<tr><td data-label="Technology">Azure Cosmos DB</td><td data-label="Traversal mechanism">Cosmos-Gremlin</td><td data-label="Run status">Not measured</td></tr>
+<tr><td data-label="Technology">Azure Cosmos DB</td><td data-label="Traversal mechanism">Cosmos-Gremlin-Path</td><td data-label="Run status">Not measured</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
     <section class="section" id="modeling-tradeoffs">
       <h2>Database modeling types: strengths and tradeoffs</h2>
       <p class="section-lead">Compare these designs as long-running services answering concurrent, bounded multi-hop reads over skewed financial graphs. The critical differences are query execution, degree/fan-out behavior, partition or key hotspots, and the capacity unit that eventually throttles or saturates.</p>
@@ -518,6 +541,7 @@ repay edge:     {label: "repay", outV: "10001", inV: "9001",
         <article class="tradeoff-card">
           <h3>Neo4j</h3><div class="tradeoff-type">Graph-native model</div>
           <div class="tradeoff-points"><div><h4>Strengths</h4><p>Database-side path expansion avoids an application round trip for every hop; native adjacency and typed edge properties fit variable-length queries. Identity indexes locate the starting vertex.</p></div><div><h4>Tradeoffs</h4><p>Runtime grows with visited edges and branching factor; large unbounded path patterns can consume CPU and memory. Use selective starts, depth/frontier bounds, and query plans for production traffic.</p></div><div class="capacity-watch"><h4>Capacity watch</h4><p>Size memory/page cache and compute for the hot working set and concurrent traversal load. A supernode remains expensive even in a highly available cluster; availability replicas do not make fan-out free. No universal graph-size cap is assumed here: practical capacity depends on deployment topology and workload.</p></div></div>
+          <p class="physical-note">APOC-BFS uses global node uniqueness to bound expansion; it measures shortest-reachability at the requested depth, not all variable-length paths returned by Cypher.</p>
         </article>
         <article class="tradeoff-card">
           <h3>Memcached</h3><div class="tradeoff-type">Application-managed key-value graph cache, not a graph database</div>

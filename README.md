@@ -1,3 +1,4 @@
+The Neo4j APOC variant uses bounded breadth-first expansion with global node uniqueness to prevent path explosion. Its output represents shortest-reachability by depth, unlike Cypher variable-length matching, which can return multiple paths to the same endpoint; compare these as distinct semantics, not interchangeable query syntax.
 # LDBC FinBench Multi-Engine Graph Benchmark Suite
 
 Comprehensive, cloud-native benchmark suite implementing the official **[LDBC Financial Benchmark (FinBench) Specification](https://ldbcouncil.org/ldbc_finbench_docs/ldbc-finbench-specification.pdf)**.
@@ -222,9 +223,14 @@ docker compose run --rm data-generator --preset local --target neo4j,memcached -
 # Benchmark from 1 to 100 hops
 docker compose run --rm test-runner --engines neo4j,memcached --hops 1,2,3,4,5,10,20,50,100 --iterations 10
 
+# Run all implemented query/traversal mechanisms on currently reachable services
+python3 test-runner/runner.py --engines all --hops 1,2,3,4,5,10,20,50,100 --iterations 10
+
 # Or benchmark arbitrary hop range with step 1
 docker compose run --rm test-runner --engines neo4j,memcached --hop-range 1 100 --hop-step 5 --iterations 10
 ```
+
+The mechanism matrix is: Neo4j Cypher variable-length paths, DirectedTrail Cypher, and APOC path expansion; Memcached BFS MultiGet and sequential DFS; Neptune Gremlin, openCypher, and SPARQL; Spanner Graph GQL and relational SQL joins; Cosmos Gremlin endpoint traversal and path-tracking (`simplePath().path()`). Cosmos is a Gremlin graph API, so the latter are traversal strategies rather than separate query languages. `--engines all` attempts each configured mechanism and skips endpoints that are not reachable; for valid cross-mechanism comparisons, initialize each backend with the same dataset and run against the production service or an API-compatible emulator.
 
 ---
 
