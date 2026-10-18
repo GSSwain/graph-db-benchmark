@@ -3,6 +3,8 @@ The Neo4j APOC variant uses bounded breadth-first expansion with global node uni
 
 Comprehensive, cloud-native benchmark suite implementing the official **[LDBC Financial Benchmark (FinBench) Specification](https://ldbcouncil.org/ldbc_finbench_docs/ldbc-finbench-specification.pdf)**.
 
+Live benchmark report: [https://gsswain.com/graph-db-benchmark/](https://gsswain.com/graph-db-benchmark/)
+
 Designed to benchmark multi-hop read traversals (**1 hop, 2 hops, ... up to 100 hops**) and transactional risk patterns across:
 1. **Neo4j** (Native Graph DBMS with Cypher)
 2. **Memcached** (Ultra-high-throughput In-Memory Graph Adjacency Cache)
@@ -12,7 +14,7 @@ Designed to benchmark multi-hop read traversals (**1 hop, 2 hops, ... up to 100 
 
 ---
 
-## 1. System Architecture
+## System Architecture
 
 The benchmark is decomposed into modular **containerized capabilities**:
 
@@ -44,7 +46,7 @@ graph TD
         RUN --> MET
     end
 
-    subgraph "Industry-Standard Reporting"
+    subgraph "Benchmark Reporting"
         HTML[Interactive HTML Dashboard]
         JSON[LDBC JSON Summary]
         CSV[Granular Latency CSV]
@@ -69,7 +71,7 @@ graph TD
 
 ---
 
-## 2. LDBC FinBench Schema Mapping
+## LDBC FinBench Schema Mapping
 
 The benchmark faithfully implements the vertices and multi-edges of the LDBC FinBench specification:
 
@@ -101,7 +103,7 @@ Schema DDL scripts are provided in `schemas/`:
 
 ---
 
-## 3. Scale Architecture: 100M Users, 10B Accounts, 10T Transactions
+## Scale Architecture: 100M Users, 10B Accounts, 10T Transactions
 
 Generating and evaluating **10 Trillion transactions** (~500 TB to 1 PB raw graph data) requires a distributed architecture:
 
@@ -124,7 +126,7 @@ Each worker node runs `generator.py` with `--partitions <N> --partition-id <I>`:
 
 ---
 
-## 4. Multi-Hop Read Traversal (1 to 100 Hops)
+## Multi-Hop Read Traversal (1 to 100 Hops)
 
 In financial transaction networks, tracking multi-hop fund dispersion ($A_0 \to A_1 \to \dots \to A_k$) is critical for detecting layering, money laundering rings, and fraud networks.
 
@@ -179,7 +181,7 @@ When a database supports multiple query languages or execution paradigms, this b
 
 ---
 
-## 5. Quickstart: Local Docker Run
+## Quickstart: Local Docker Run
 
 ### Prerequisites
 * Docker & Docker Compose (v2.20+)
@@ -198,7 +200,7 @@ This script automatically:
 
 ---
 
-## 6. Manual Execution & Capabilities
+## Manual Execution & Capabilities
 
 ### Step 1: Start Database Containers
 ```bash
@@ -234,7 +236,7 @@ The mechanism matrix is: Neo4j Cypher variable-length paths, DirectedTrail Cyphe
 
 ---
 
-## 7. Industry-Standard Benchmark Reporting
+## Benchmark Reporting
 
 The test runner outputs:
 1. **Interactive HTML Dashboard** (`docs/benchmark_report.html`):
@@ -257,7 +259,7 @@ GitHub Pages publishes the `docs/` directory. The site landing page is [docs/ind
 
 ---
 
-## 8. Database Infrastructure Cost Estimation (DB Only)
+## Database Infrastructure Cost Estimation (DB Only)
 
 To evaluate the operational total cost of ownership (TCO) across different database engines and scales, the benchmark suite includes a dedicated **Database Infrastructure Cost Estimator** ([scripts/cost_estimator.py](file:///Users/gsswain/ai-code/code/graph-db-benchmark/scripts/cost_estimator.py) and [test-runner/reporting/cost_estimator.py](file:///Users/gsswain/ai-code/code/graph-db-benchmark/test-runner/reporting/cost_estimator.py)).
 
@@ -336,7 +338,7 @@ Pass `--neo4j-license-usd-per-core-month <quoted-rate>` to the benchmark runner 
 
 ---
 
-## 9. Cloud Deployment Guide
+## Cloud Deployment Guide
 
 Deployment capabilities for deploying to hyperscale clouds are located in `cloud-deploy/`:
 
@@ -365,7 +367,7 @@ Deployment capabilities for deploying to hyperscale clouds are located in `cloud
 
 ---
 
-## 10. Verification & Diagnostics
+## Verification & Diagnostics
 
 To verify which database engines are reachable:
 ```bash
